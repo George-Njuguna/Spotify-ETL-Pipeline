@@ -1,0 +1,32 @@
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+venv/
+.env/
+
+# Ignore all files inside cache folder
+cache/
+
+# Environment variables
+.env
+*.env
+
+# Airflow logs and database
+logs/
+airflow.db
+*.pid
+untracked_files/
+
+# Docker logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Ignore the entire config folder
+config/

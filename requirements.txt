@@ -1,0 +1,5 @@
+spotipy==2.25.1
+pandas
+python-dotenv
+pendulum
+psycopg2-binary
