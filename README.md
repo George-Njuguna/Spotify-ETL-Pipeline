@@ -53,7 +53,7 @@ Finally, I will build an interactive dashboard in **Tableau** to visualize the i
 
 ## 📊 Dashboard Example
 
-*(Consider adding screenshots here once your Tableau dashboard is complete)*
+
 
 ---
 
