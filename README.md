@@ -23,12 +23,12 @@ Finally, I will build an interactive dashboard in **Tableau** to visualize the i
 
 ## 🛠️ Tech Stack
 
-* **Programming Language:** Python
-* **Workflow Orchestration:** Apache Airflow
-* **Containerization:** Docker
-* **Database:** PostgreSQL
-* **API Integration:** Spotify API
-* **Data Visualization:** Tableau
+*  Python
+*  Apache Airflow
+*  Docker
+*  PostgreSQL
+*  Spotify API
+*  Tableau
 
 ---
 
