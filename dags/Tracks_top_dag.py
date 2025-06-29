@@ -6,7 +6,7 @@ from pendulum import timezone
 
 with DAG(
     dag_id="run_top_tracks_artists_savedtracks_script",
-    start_date=datetime(2024, 7, 29, 22, 10, tzinfo=timezone("Africa/Nairobi")),
+    start_date=datetime(2024, 1, 30, 22, 10, tzinfo=timezone("Africa/Nairobi")),
     schedule=timedelta(weeks=2),
     catchup=False
     
