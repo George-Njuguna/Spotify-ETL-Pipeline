@@ -9,7 +9,7 @@ load_dotenv()
 
 sp = get_spotify_client()
 
-recently_played_tracks = sp.current_user_recently_played(limit = 30)
+recently_played_tracks = sp.current_user_recently_played(limit = 50)
 
 
 recently_played_data = [
