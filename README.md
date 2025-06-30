@@ -1,4 +1,5 @@
 # Spotify ETL Pipeline with Airflow, Docker, PostgreSQL, and Tableau
+![alt text](<ETL Illustration.png>)
 
 ## 📖 Project Overview
 
