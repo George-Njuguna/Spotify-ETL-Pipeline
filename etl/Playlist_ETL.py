@@ -10,7 +10,7 @@ sp = get_spotify_client()
  # Getting the data from spotify
 playlists = sp.current_user_playlists()
 followed_artists = sp.current_user_followed_artists()
-saved_albums = sp.current_user_saved_albums()
+saved_albums = sp.current_user_saved_albums(limit=50)
 
  # Loading and transforming the data
  #playlists
