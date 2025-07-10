@@ -3,13 +3,19 @@ import os
 from dotenv import load_dotenv
 from API import get_spotify_client
 from dateutil.parser import isoparse 
+from datetime import datetime, timedelta, timezone
 from Functions import create_recently_played_table , insert_recent_tracks_bulk
 
 load_dotenv()
 
+local_time = datetime(2025, 7, 10, 14, 0)  
+utc_time = local_time - timedelta(hours=3)  
+timestamp_ms = int(utc_time.replace(tzinfo=timezone.utc).timestamp() * 1000)
+
 sp = get_spotify_client()
 
-recently_played_tracks = sp.current_user_recently_played(limit = 50)
+recently_played_tracks = sp.current_user_recently_played(limit = 50 , before=timestamp_ms)
+recently_played_tracks1 = sp.current_user_recently_played(limit = 50 , after=timestamp_ms)
 
 
 recently_played_data = [
@@ -28,6 +34,23 @@ recently_played_data = [
     for item in recently_played_tracks['items']
 ]
 
+
+recently_played_data1 = [
+    {
+        'played_at': isoparse(item['played_at']),
+        'album_name':item['track']['album']['name'],
+        'album_id':item['track']['album']['id'],
+        'artist_name':item['track']['artists'][0]['name'],
+        'artist_id':item['track']['artists'][0]['id'],
+        'name':item['track']['name'],
+        'track_id':item['track']['id'],
+        'duration':item['track']['duration_ms'],
+        'explicit':bool(item['track']['explicit']),
+        'popularity':int(item['track']['popularity'])
+    }
+    for item in recently_played_tracks1['items']
+]
+
  # Loading the data 
 try:
     # connecting to the database
@@ -43,6 +66,7 @@ try:
     # run your ETL or insert logic here
     create_recently_played_table(conn)
     insert_recent_tracks_bulk(conn, recently_played_data)
+    insert_recent_tracks_bulk(conn, recently_played_data1)
 
 except Exception as e:
     print("❌ ERROR:", e)
