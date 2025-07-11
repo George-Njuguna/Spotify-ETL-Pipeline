@@ -5,7 +5,7 @@
 
 In this project, I aim to build a fully functional **ETL (Extract, Transform, Load) pipeline** to collect and analyze my personal Spotify data. The pipeline will extract Spotify data such as **saved playlists, recently played tracks, saved albums, saved tracks, top artists, and top tracks** using the Spotify API.
 
-The extracted data will undergo transformation and will be loaded into a **PostgreSQL** database hosted locally. I will orchestrate and schedule the ETL processes using **Apache Airflow** within a **Docker** container, enabling automated data extraction on a **daily, bi-weekly, and monthly** basis to capture time-specific trends.
+The extracted data will undergo transformation and will be loaded into a **PostgreSQL** database hosted locally. I will schedule the ETL processes using **Apache Airflow** within a **Docker** container, enabling automated data extraction on a **daily, bi-weekly, and monthly** basis to capture time-specific trends.
 
 Finally, I will build an interactive dashboard in **Tableau** to visualize the insights from my Spotify listening history. This dashboard will serve as a personal version of **Spotify Wrapped**, providing detailed analytics on my listening habits over time.
 
