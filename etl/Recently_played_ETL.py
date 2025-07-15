@@ -4,13 +4,20 @@ from dotenv import load_dotenv
 from API import get_spotify_client
 from dateutil.parser import isoparse 
 from datetime import datetime, timedelta, timezone
+import pytz
 from Functions import create_recently_played_table , insert_recent_tracks_bulk
 
 load_dotenv()
 
-local_time = datetime(2025, 7, 10, 14, 0)  
-utc_time = local_time - timedelta(hours=3)  
-timestamp_ms = int(utc_time.replace(tzinfo=timezone.utc).timestamp() * 1000)
+area = pytz.timezone("Africa/Nairobi")
+today = datetime.now(area).date()
+
+local_2pm = datetime.combine(today, datetime.min.time()) + timedelta(hours=14)
+local_2pm = area.localize(local_2pm)
+
+
+utc_2pm = local_2pm.astimezone(pytz.utc)
+timestamp_ms = int(utc_2pm.timestamp() * 1000)
 
 sp = get_spotify_client()
 
