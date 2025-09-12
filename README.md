@@ -1,7 +1,7 @@
 # Spotify ETL Pipeline with Airflow, Docker, PostgreSQL, and Tableau
 ![alt text](<ETL Illustration.png>)
 
-## 📖 Project Overview
+## Project Overview
 
 In this project, I aim to build a fully functional **ETL (Extract, Transform, Load) pipeline** to collect and analyze my personal Spotify data. The pipeline will extract Spotify data such as **saved playlists, recently played tracks, saved albums, saved tracks, top artists, and top tracks** using the Spotify API.
 
@@ -11,7 +11,7 @@ Finally, I will build an interactive dashboard in **Tableau** to visualize the i
 
 ---
 
-## 🚀 Features
+##  Features
 
 * Automated extraction of Spotify data via the Spotify API
 * Scheduled ETL workflows using Apache Airflow
@@ -22,7 +22,7 @@ Finally, I will build an interactive dashboard in **Tableau** to visualize the i
 
 ---
 
-## 🛠️ Tech Stack
+##  Tech Stack
 
 *  Python
 *  Apache Airflow
@@ -33,7 +33,7 @@ Finally, I will build an interactive dashboard in **Tableau** to visualize the i
 
 ---
 
-## ⚙️ Installation & Setup
+##  Installation & Setup
 
 ### Prerequisites
 
@@ -44,7 +44,7 @@ Finally, I will build an interactive dashboard in **Tableau** to visualize the i
 
 
 
-## 📅 Scheduling Intervals
+##  Scheduling Intervals
 
 * **Daily:** Recently played tracks
 * **Bi-Weekly:** Saved tracks, saved albums
@@ -52,16 +52,16 @@ Finally, I will build an interactive dashboard in **Tableau** to visualize the i
 
 ---
 
-## 📊 Dashboard Example
+##  Dashboard Example
 
 
 
 ---
 
-## 🤝 Contributing
+##  Contributing
 
 Contributions are welcome! Please feel free to submit a pull request or open an issue to suggest improvements.
 
 ---
 
-### ⭐️ *If you like this project, don't forget to give it a star!*
+### *If you like this project, don't forget to give it a star!*
