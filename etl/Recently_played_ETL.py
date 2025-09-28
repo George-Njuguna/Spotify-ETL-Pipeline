@@ -9,7 +9,11 @@ from Functions import create_recently_played_table , insert_recent_tracks_bulk
 
 load_dotenv()
 
-sp = get_spotify_client()
+try:
+    sp = get_spotify_client()
+    print(" GOT SPOTIFY CLIENT ")
+except:
+    print("COULDN'T GET SPOTIFY CLIENT : RELOAD CACHE")
 
 recently_played_tracks = sp.current_user_recently_played(limit = 50)
 

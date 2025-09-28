@@ -5,7 +5,11 @@ from API import get_spotify_client
 from Functions import create_playlist_table , create_followed_artist_table , create_saved_albums_table , insert_followed_artists_bulk , insert_playlists_bulk , insert_saved_albums_bulk
 
 load_dotenv()
-sp = get_spotify_client()
+try:
+    sp = get_spotify_client()
+    print(" GOT SPOTIFY CLIENT ")
+except:
+    print("COULDN'T GET SPOTIFY CLIENT : RELOAD CACHE")
 
  # Getting the data from spotify
 playlists = sp.current_user_playlists()

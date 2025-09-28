@@ -10,7 +10,11 @@ date = datetime.now().date()
 
 load_dotenv()
 
-sp = get_spotify_client()
+try:
+    sp = get_spotify_client()
+    print(" GOT SPOTIFY CLIENT ")
+except:
+    print("COULDN'T GET SPOTIFY CLIENT : RELOAD CACHE")
 
 top_artists = sp.current_user_top_artists(time_range = 'short_term')
 top_tracks=sp.current_user_top_tracks(time_range = 'short_term')

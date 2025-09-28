@@ -5,7 +5,11 @@ from API import get_spotify_client
 from Functions import create_saved_tracks_table , insert_saved_tracks_bulk
 
 load_dotenv()
-sp = get_spotify_client()
+try:
+    sp = get_spotify_client()
+    print(" GOT SPOTIFY CLIENT ")
+except:
+    print("COULDN'T GET SPOTIFY CLIENT : RELOAD CACHE")
 
 saved_tracks = sp.current_user_saved_tracks()
 
