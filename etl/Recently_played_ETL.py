@@ -9,14 +9,14 @@ from Functions import create_recently_played_table , insert_recent_tracks_bulk
 
 load_dotenv()
 
-try:
-    sp = get_spotify_client()
-    print(" GOT SPOTIFY CLIENT ")
+sp = get_spotify_client()
+
+
+try :
+    recently_played_tracks = sp.current_user_recently_played(limit = 50)
+    print(" GOT RECENTLY PLAYED TRACKS FROM API ")
 except:
     print("COULDN'T GET SPOTIFY CLIENT : RELOAD CACHE")
-
-recently_played_tracks = sp.current_user_recently_played(limit = 50)
-
 
 
 recently_played_data = [

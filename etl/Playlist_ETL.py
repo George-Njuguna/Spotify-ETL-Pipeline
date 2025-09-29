@@ -5,16 +5,19 @@ from API import get_spotify_client
 from Functions import create_playlist_table , create_followed_artist_table , create_saved_albums_table , insert_followed_artists_bulk , insert_playlists_bulk , insert_saved_albums_bulk
 
 load_dotenv()
-try:
-    sp = get_spotify_client()
-    print(" GOT SPOTIFY CLIENT ")
-except:
-    print("COULDN'T GET SPOTIFY CLIENT : RELOAD CACHE")
+
+sp = get_spotify_client()
+
+
 
  # Getting the data from spotify
-playlists = sp.current_user_playlists()
-followed_artists = sp.current_user_followed_artists()
-saved_albums = sp.current_user_saved_albums(limit=50)
+try :
+    playlists = sp.current_user_playlists()
+    followed_artists = sp.current_user_followed_artists()
+    saved_albums = sp.current_user_saved_albums(limit=50)
+    print(" GOT DATA FROM API ")
+except:
+    print("COULDN'T GET SPOTIFY CLIENT : RELOAD CACHE")
 
  # Loading and transforming the data
  #playlists
