@@ -1,3 +1,5 @@
+import pandas as pd 
+
  # CREATING TABLES
  #Creating playlist Table
 def create_playlist_table(conn):
@@ -286,3 +288,27 @@ def insert_recent_tracks_bulk(conn, data):
             print("✅ Data Succesfully Loaded")
     except Exception as e:
         print("❌ ERROR in Loading saved albums data",e)
+
+
+ # Importing data from postgres
+def import_data(table_name, conn):
+    if not isinstance(table_name, str):
+        raise ValueError("Input 'table_name' should be a string repin the table name")
+    """    
+    Imports the data from postgress
+    
+    Parameters
+    ----------
+    table_name : name of the table in the database
+    conn : connection to the dataframe 
+
+    Returns
+    -------
+    df : pd.Dataframe
+    """
+    try:
+        df = pd.read_sql(f"SELECT * FROM {table_name}", conn)
+        print("✅  DATA SUCCESFULLY LOADED ")
+        return df
+    except Exception as e:
+            print("❌ ERROR : COULD NOT LOAD DATA FROM DATABASE : ", e)
