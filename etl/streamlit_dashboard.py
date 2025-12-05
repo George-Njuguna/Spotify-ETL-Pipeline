@@ -96,4 +96,4 @@ with T1:
                 st.plotly_chart(fig, width='stretch', theme="streamlit")
 
     
-    
+     # pie chart 
