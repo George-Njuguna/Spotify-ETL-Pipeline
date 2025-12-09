@@ -176,7 +176,10 @@ def insert_playlists_bulk(conn, data):
             cur.executemany("""
                 INSERT INTO playlists (id, name, owner_id, public, tracks)
                 VALUES (%s,%s,%s,%s,%s)
-                ON CONFLICT (id) DO NOTHING;
+                ON CONFLICT (id)
+                DO UPDATE SET 
+                    name = EXCLUDED.name,
+                    tracks = EXCLUDED.tracks;
             """, [
                 (pl['id'], pl['name'], pl['owner_id'], pl['public'], pl['tracks'])
                 for pl in data
