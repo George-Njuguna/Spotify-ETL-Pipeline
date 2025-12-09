@@ -62,6 +62,7 @@ recently_played_df = load_cached_data("recently_played_tracks")
 top_artists_df = load_cached_data("top_artists")
 top_tracks_df = load_cached_data("top_tracks")
 saved_tracks_df = load_cached_data("saved_tracks")
+genre_df = load_cached_data("genre")
 
  # Setting Header
 st.title("SPOTIFY WRAPPED DASHBOARD")
@@ -97,3 +98,32 @@ with T1:
 
     
      # pie 
+    with col2:
+         with st.container(border=True):
+            data = genre_df["genre"].value_counts()
+
+            pie_labels = data.index
+            pie_values = data.values
+            total_count = genre_df["genre"].nunique()
+
+            fig = px.pie(
+                names=pie_labels,
+                values=pie_values,
+                hole=0.75  
+            )
+
+            fig.add_annotation(
+            text=f"{total_count:,} Genres",
+            x=0.5,            
+            y=0.5,             
+            showarrow=False,
+            font=dict(
+                size=18,
+                color="White"
+            )
+        )
+
+            fig.update_traces(textinfo='none', rotation = 160) 
+            fig.update_layout(title="Transactions Summary")
+
+            st.plotly_chart(fig, width="stretch", theme="streamlit")
