@@ -65,8 +65,24 @@ saved_tracks_df = load_cached_data("saved_tracks")
 genre_df = load_cached_data("genre")
 playlist_songs_df = load_cached_data("playlist_tracks")
 
+dataframes = [playlists_df , followed_artists_df , saved_albums_df, recently_played_df, top_artists_df, top_tracks_df, saved_tracks_df , genre_df , playlist_songs_df]
+
  # Creating a column duration minutes
 recently_played_df["duration_minutes"] = recently_played_df["duration"]//60
+
+ # creating a table containing totals 
+overview_dfs = [playlists_df , followed_artists_df , saved_albums_df, saved_tracks_df ]
+cols = ["Playlists", "Followed Artists", "Saved Albums", "Saved_Tracks"]
+tot_counts = []
+
+for df , name  in zip(overview_dfs,cols):
+    totals = (df.shape)[0]
+    tot_counts.append({
+        "df" : name ,
+        "counts" : totals
+    })
+
+tot_df = pd.DataFrame(tot_counts)
 
  # Setting Header
 st.title("SPOTIFY WRAPPED DASHBOARD")
@@ -81,13 +97,13 @@ with T1:
     k3.metric("Playlists", f"{(playlists_df.shape)[0]}")
     k4.metric("Followed Artists", f"{(followed_artists_df.shape)[0]}")
 
-    col1, col2 = st.columns([3, 1])
+    T1_col1, T1_col2 = st.columns([3, 1])
 
      # line graph 
     listening_hourly = recently_played_df.resample("d", on="played_at")["duration_minutes"].sum().rolling(3).mean().rename("All").reset_index()
     df_melted = listening_hourly.rename(columns={"All": "Total Listening Time (Minute)", "played_at" : "Time of day"})
 
-    with col1:
+    with T1_col1:
             with st.container(border=True):
                 fig = px.line(
                     df_melted,
@@ -102,7 +118,7 @@ with T1:
 
     
      # pie 
-    with col2:
+    with T1_col2:
          with st.container(border=True):
             data = genre_df["genre"].value_counts()
 
@@ -131,3 +147,20 @@ with T1:
             fig.update_layout(title="Transactions Summary")
 
             st.plotly_chart(fig, width="stretch", theme="streamlit")
+
+    T1_col3, T1_col4 = st.columns([3, 1])
+
+     # Bar Graph
+    with T1_col3:
+         with st.container(border=True):
+            
+            fig_bar = px.bar(
+                tot_df,
+                x="df",
+                y="counts",
+                title="Music at a Glance"
+            )
+
+            st.plotly_chart(fig_bar, width="stretch", theme="streamlit")
+              
+    
