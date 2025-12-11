@@ -63,6 +63,7 @@ top_artists_df = load_cached_data("top_artists")
 top_tracks_df = load_cached_data("top_tracks")
 saved_tracks_df = load_cached_data("saved_tracks")
 genre_df = load_cached_data("genre")
+playlist_songs_df = load_cached_data("playlist_tracks")
 
  # Setting Header
 st.title("SPOTIFY WRAPPED DASHBOARD")
@@ -121,7 +122,7 @@ with T1:
                 size=18,
                 color="White"
             )
-        )
+        ) 
 
             fig.update_traces(textinfo='none', rotation = 160) 
             fig.update_layout(title="Transactions Summary")
