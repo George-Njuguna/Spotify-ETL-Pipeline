@@ -135,7 +135,7 @@ with T1:
             fig = px.pie(
                 names=pie_labels,
                 values=pie_values,
-                hole=0.5  
+                hole=0.8 
             )
 
             fig.add_annotation(
