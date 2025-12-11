@@ -154,7 +154,7 @@ with T1:
 
             st.plotly_chart(fig, width="stretch", theme="streamlit")
 
-    T1_col3, T1_col4 = st.columns([3, 1])
+    T1_col3, T1_col4 = st.columns([3, 1.5])
 
      # Bar Graph
     with T1_col3:
@@ -173,5 +173,12 @@ with T1:
             fig_bar.update_yaxes(showticklabels=False)
 
             st.plotly_chart(fig_bar, width="stretch", theme="streamlit")
+
+    with T1_col4:
+            with st.container():
+                table_data = ((recently_played_df.sort_values(by='played_at',ascending = False )).reset_index()).head(20)
+                table_data = table_data[["name", "artist_name", "album_name"]]
+                st.write("Recently Played Tracks")
+                st.dataframe(table_data, width="stretch") 
               
     
