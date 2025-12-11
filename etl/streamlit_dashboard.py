@@ -97,6 +97,8 @@ with T1:
     k3.metric("Playlists", f"{(playlists_df.shape)[0]}")
     k4.metric("Followed Artists", f"{(followed_artists_df.shape)[0]}")
 
+    st.markdown("---")
+
     T1_col1, T1_col2 = st.columns([3, 1])
 
      # line graph 
@@ -114,6 +116,8 @@ with T1:
                 )
 
                 fig.update_traces(mode="lines+markers")
+                fig.update_xaxes(showgrid=False)
+                fig.update_yaxes(showgrid=False)
                 st.plotly_chart(fig, width='stretch', theme="streamlit")
 
     
@@ -129,7 +133,7 @@ with T1:
             fig = px.pie(
                 names=pie_labels,
                 values=pie_values,
-                hole=0.75  
+                hole=0.5  
             )
 
             fig.add_annotation(
@@ -152,14 +156,17 @@ with T1:
 
      # Bar Graph
     with T1_col3:
-         with st.container(border=True):
+         with st.container(border=False):
             
             fig_bar = px.bar(
                 tot_df,
                 x="df",
                 y="counts",
-                title="Music at a Glance"
+                title="Library at a Glance"
             )
+            fig_bar.update_xaxes(showgrid=False)
+            fig_bar.update_yaxes(showgrid=False)
+            fig_bar.update_yaxes(showline=False)
 
             st.plotly_chart(fig_bar, width="stretch", theme="streamlit")
               
