@@ -68,7 +68,7 @@ playlist_songs_df = load_cached_data("playlist_tracks")
 dataframes = [playlists_df , followed_artists_df , saved_albums_df, recently_played_df, top_artists_df, top_tracks_df, saved_tracks_df , genre_df , playlist_songs_df]
 
  # Creating a column duration minutes
-recently_played_df["duration_minutes"] = recently_played_df["duration"]//60
+recently_played_df["duration_minutes"] = pd.to_timedelta(recently_played_df["duration"], unit='ms') / pd.Timedelta(minutes=1) 
 
  # creating a table containing totals 
 overview_dfs = [playlists_df , followed_artists_df , saved_albums_df, saved_tracks_df ]
