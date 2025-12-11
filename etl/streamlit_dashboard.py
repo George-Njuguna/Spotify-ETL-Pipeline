@@ -117,7 +117,9 @@ with T1:
 
                 fig.update_traces(mode="lines+markers")
                 fig.update_xaxes(showgrid=False)
+                fig.update_xaxes(showline=False)
                 fig.update_yaxes(showgrid=False)
+                fig.update_yaxes(showticklabels=False)
                 st.plotly_chart(fig, width='stretch', theme="streamlit")
 
     
@@ -167,6 +169,8 @@ with T1:
             fig_bar.update_xaxes(showgrid=False)
             fig_bar.update_yaxes(showgrid=False)
             fig_bar.update_yaxes(showline=False)
+            fig_bar.update_xaxes(showline=False)
+            fig_bar.update_yaxes(showticklabels=False)
 
             st.plotly_chart(fig_bar, width="stretch", theme="streamlit")
               
