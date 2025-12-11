@@ -65,6 +65,9 @@ saved_tracks_df = load_cached_data("saved_tracks")
 genre_df = load_cached_data("genre")
 playlist_songs_df = load_cached_data("playlist_tracks")
 
+ # Creating a column duration minutes
+recently_played_df["duration_minutes"] = recently_played_df["duration"]//60
+
  # Setting Header
 st.title("SPOTIFY WRAPPED DASHBOARD")
 
@@ -81,15 +84,15 @@ with T1:
     col1, col2 = st.columns([3, 1])
 
      # line graph 
-    listening_hourly = recently_played_df.resample("d", on="played_at")["duration"].sum().rolling(3).mean().rename("All").reset_index()
-    df_melted = listening_hourly.rename(columns={"All": "Total Listening Time (Second)", "played_at" : "Hour of Day"})
+    listening_hourly = recently_played_df.resample("d", on="played_at")["duration_minutes"].sum().rolling(3).mean().rename("All").reset_index()
+    df_melted = listening_hourly.rename(columns={"All": "Total Listening Time (Minute)", "played_at" : "Time of day"})
 
     with col1:
             with st.container(border=True):
                 fig = px.line(
                     df_melted,
-                    x="Hour of Day",
-                    y="Total Listening Time (Second)",
+                    x="Time of day",
+                    y="Total Listening Time (Minute)",
                     line_shape="spline",
                     title="Hourly Listening Trend"
                 )
