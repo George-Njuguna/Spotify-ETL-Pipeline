@@ -150,7 +150,7 @@ with T1:
         ) 
 
             fig.update_traces(textinfo='none', rotation = 160) 
-            fig.update_layout(title="Transactions Summary")
+            fig.update_layout(title="Music Genres Overview")
 
             st.plotly_chart(fig, width="stretch", theme="streamlit")
 
