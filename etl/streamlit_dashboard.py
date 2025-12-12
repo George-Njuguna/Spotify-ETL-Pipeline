@@ -90,6 +90,8 @@ st.title("SPOTIFY WRAPPED DASHBOARD")
  # setting tabs
 T1,T2,T3,T4,T5,T6 = st.tabs(["Overview", "Listening Stats", "Playlists", "Albums", "Saved Songs", "Artists"])
 
+
+ # --------------OVERVIEW--------------
 with T1:
     k1, k2, k3, k4 = st.columns([1,1,1,1])
     k1.metric("Saved Tracks", f"{(saved_tracks_df.shape)[0]:,}")
@@ -180,5 +182,10 @@ with T1:
                 table_data = table_data[["name", "artist_name", "album_name"]]
                 st.write("Recently Played Tracks")
                 st.dataframe(table_data, width="stretch") 
+
+
+
+ # -------------- LISTENING STATS ------------------
+
               
     
