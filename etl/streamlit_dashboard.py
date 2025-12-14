@@ -67,8 +67,9 @@ playlist_songs_df = load_cached_data("playlist_tracks")
 
 dataframes = [playlists_df , followed_artists_df , saved_albums_df, recently_played_df, top_artists_df, top_tracks_df, saved_tracks_df , genre_df , playlist_songs_df]
 
- # Creating a column duration minutes
+ # Creating a column duration minutes and changing played at to date 
 recently_played_df["duration_minutes"] = pd.to_timedelta(recently_played_df["duration"], unit='ms') / pd.Timedelta(minutes=1) 
+recently_played_df['played_at_date'] = recently_played_df['played_at'].dt.tz_localize(None).dt.date
 
  # creating a table containing totals 
 overview_dfs = [playlists_df , followed_artists_df , saved_albums_df, saved_tracks_df ]
@@ -85,8 +86,8 @@ for df , name  in zip(overview_dfs,cols):
 tot_df = pd.DataFrame(tot_counts)
 
  # getting max date and min date 
-max_date = recently_played_df["played_at"].max()
-min_date = recently_played_df["played_at"].min()
+max_date = recently_played_df["played_at_date"].max()
+min_date = recently_played_df["played_at_date"].min()
 
  # Setting Header
 st.title("SPOTIFY WRAPPED DASHBOARD")
@@ -191,11 +192,35 @@ with T1:
 
  # -------------- LISTENING STATS ------------------
 with T2:
-    
     date_filter, plots = st.columns([0.5, 4])
+
     with date_filter:
         st.write("Filters")
         start_dt = st.date_input("From", value= None, min_value = min_date , max_value = max_date)
         end_dt = st.date_input("To", value= None , min_value = start_dt , max_value = max_date)
-              
+
+    with plots:
+        
+        if start_dt is not  None and end_dt is None: # only the start date
+            filter = recently_played_df['played_at_date'] == start_dt 
+            data = recently_played_df[filter]
+
+        elif start_dt is not None and end_dt is not None:
+            filter = ((recently_played_df['played_at_date'] >= start_dt) & (recently_played_df['played_at_date'] <= end_dt))
+            data = recently_played_df[filter]
+        
+        else:
+            filter = ((recently_played_df['played_at_date'] >= min_date) & (recently_played_df['played_at_date'] <= max_date))
+            data = recently_played_df
+
+         # ------------KPI'S-------------
+        k1, k2, k3, k4, k5, k6 = st.columns([1,1,1,1,1,1])
+
+        k1.metric("Listened_songs", f"{(data.shape)[0]:,}")
+        k2.metric("Average Artist Popularity", f"{(saved_albums_df.shape)[0]}")
+        k3.metric("Total Listening Minutes", f"{(playlists_df.shape)[0]}")
+        k4.metric("Average Track Duration", f"{(followed_artists_df.shape)[0]}")
+        k5.metric("Average Track Duration", f"{(followed_artists_df.shape)[0]}")
+        k6.metric("Average Track Duration", f"{(followed_artists_df.shape)[0]}")
+
     
