@@ -19,24 +19,19 @@ st.set_page_config(page_title="My Dashboard", layout="wide")
 st.markdown("""
 <style>
 div[data-testid="stMetricLabel"] {
-    font-size: 0.85rem;
-    font-weight: 500;
+    font-size: 0.99rem;
+    font-weight: 800;
 }
 
 div[data-testid="stMetricValue"] {
     font-size: 1.6rem;
     font-weight: 700;
 }
-</style>
-""", unsafe_allow_html=True)
 
-
-st.markdown("""
-<style>
 @font-face {
     font-family: 'CircularStd';
     src: url('file:///G:/PYTHON_PROJECTS/Scripts/airflow-docker/CircularStd-BookItalic.woff2') format('woff2');
-    font-weight: 400;
+    font-weight: 800;
     font-style: italic;
 }
 
@@ -48,36 +43,24 @@ html, body, [class*="css"], div, span, p {
 div[data-testid="stMetric"] {
     text-align: center;
 }
-</style>
-""", unsafe_allow_html=True)
 
-st.markdown("""
-<style>
-div[data-testid="stMetric"] {
-    text-align: center;
+.block-container {
+    padding-top: 1rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
 }
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown("""
-    <style>
-        .block-container {
-            padding-top: 1rem;
-            padding-left: 1rem;
-            padding-right: 1rem;
-        }
-    </style>
-""", unsafe_allow_html=True)
-
 plt.rcParams["figure.facecolor"] = "none"
 plt.rcParams["axes.facecolor"] = "none"
-
 plt.rcParams["text.color"] = "white"
 plt.rcParams["axes.labelcolor"] = "white"
 plt.rcParams["xtick.color"] = "white"
 plt.rcParams["ytick.color"] = "white"
 plt.rcParams["legend.labelcolor"] = "white"
 plt.rcParams["axes.titlecolor"] = "white"
+
 
 
 # Cache the connection
@@ -169,6 +152,8 @@ with T1:
                 fig.update_xaxes(showline=False)
                 fig.update_yaxes(showgrid=False)
                 fig.update_yaxes(showticklabels=False)
+                fig.update_layout(font=dict(family="CircularStd"))
+
                 st.plotly_chart(fig, width='stretch', theme="streamlit")
 
     
@@ -200,6 +185,7 @@ with T1:
 
             fig.update_traces(textinfo='none', rotation = 160) 
             fig.update_layout(title="Music Genres Overview")
+            fig.update_layout(font=dict(family="CircularStd"))
 
             st.plotly_chart(fig, width="stretch", theme="streamlit")
 
@@ -207,7 +193,7 @@ with T1:
 
      # Bar Graph
     with T1_col3:
-         with st.container(border=False):
+         with st.container(border=True):
             
             fig_bar = px.bar(
                 tot_df,
@@ -220,6 +206,7 @@ with T1:
             fig_bar.update_yaxes(showline=False)
             fig_bar.update_xaxes(showline=False)
             fig_bar.update_yaxes(showticklabels=False)
+            fig_bar.update_layout(font=dict(family="CircularStd"))
 
             st.plotly_chart(fig_bar, width="stretch", theme="streamlit")
 
