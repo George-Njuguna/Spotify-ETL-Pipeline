@@ -190,9 +190,12 @@ with T1:
 
 
  # -------------- LISTENING STATS ------------------
-st.sidebar.markdown("---")
-
-start_dt = st.sidebar.date_input("From", min_value = min_date , max_value = max_date)
-end_dt = st.sidebar.date_input("To", min_value = min_date , max_value = max_date)
+with T2:
+    
+    date_filter, plots = st.columns([0.5, 4])
+    with date_filter:
+        st.write("Filters")
+        start_dt = st.date_input("From", value= None, min_value = min_date , max_value = max_date)
+        end_dt = st.date_input("To", value= None , min_value = start_dt , max_value = max_date)
               
     
