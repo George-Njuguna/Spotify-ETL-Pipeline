@@ -15,6 +15,15 @@ from Functions import import_data
 load_dotenv()
 
 st.set_page_config(page_title="My Dashboard", layout="wide")
+
+st.markdown("""
+<style>
+div[data-testid="stMetric"] {
+    text-align: center;
+}
+</style>
+""", unsafe_allow_html=True)
+
 st.markdown("""
     <style>
         .block-container {
@@ -98,13 +107,11 @@ T1,T2,T3,T4,T5,T6 = st.tabs(["Overview", "Listening Stats", "Playlists", "Albums
 
  # --------------OVERVIEW--------------
 with T1:
-    k1, k2, k3, k4 = st.columns([1,1,1,1])
+    k1, k2, k3, k4 = st.columns([1,1,1,1], border = True)
     k1.metric("Saved Tracks", f"{(saved_tracks_df.shape)[0]:,}")
     k2.metric("Saved Albums", f"{(saved_albums_df.shape)[0]}")
     k3.metric("Playlists", f"{(playlists_df.shape)[0]}")
     k4.metric("Followed Artists", f"{(followed_artists_df.shape)[0]}")
-
-    st.markdown("---")
 
     T1_col1, T1_col2 = st.columns([3, 1])
 
@@ -192,41 +199,39 @@ with T1:
 
  # -------------- LISTENING STATS ------------------
 with T2:
-    date_filter, plots = st.columns([0.5, 4])
-
-    with date_filter:
-        st.write("Filters")
-        start_dt = st.date_input("From", value= None, min_value = min_date , max_value = max_date)
-        end_dt = st.date_input("To", value= None , min_value = start_dt , max_value = max_date)
-
-    with plots:
+    with st.expander("⚙ Filters"):
+            col_f1, col_f2 = st.columns(2)
+            with col_f1:
+                start_dt = st.date_input("From", value= None, min_value = min_date , max_value = max_date)
+            with col_f2:
+                end_dt = st.date_input("To", value= None , min_value = start_dt , max_value = max_date)
         
-        if start_dt is not  None and end_dt is None: # only the start date
-            filter = recently_played_df['played_at_date'] == start_dt 
-            data = recently_played_df[filter]
+    if start_dt is not  None and end_dt is None: # only the start date
+        filter = recently_played_df['played_at_date'] == start_dt 
+        data = recently_played_df[filter]
 
-        elif start_dt is not None and end_dt is not None:
-            filter = ((recently_played_df['played_at_date'] >= start_dt) & (recently_played_df['played_at_date'] <= end_dt))
-            data = recently_played_df[filter]
-        
-        else:
-            filter = ((recently_played_df['played_at_date'] >= min_date) & (recently_played_df['played_at_date'] <= max_date))
-            data = recently_played_df
+    elif start_dt is not None and end_dt is not None:
+        filter = ((recently_played_df['played_at_date'] >= start_dt) & (recently_played_df['played_at_date'] <= end_dt))
+        data = recently_played_df[filter]
+    
+    else:
+        filter = ((recently_played_df['played_at_date'] >= min_date) & (recently_played_df['played_at_date'] <= max_date))
+        data = recently_played_df
 
-         # ------------KPI'S-------------
-        k1, k2, k3, k4, k5, k6 = st.columns([1,1,1,1,1,1])
+    # ------------KPI'S-------------
+    k1, k3, k4, k5, k6 = st.columns([1, 1, 1, 1, 1], border = True)
 
-        average_popularity = data.loc[:, 'popularity'].mean()
-        listening_minutes = data['duration_minutes'].sum() 
-        avg_track_duration = data.loc[:,'duration_minutes'].mean()
-        unique_tracks = data['id'].nunique()
-        unique_artists = data['artist_id'].nunique()
+    average_popularity = data.loc[:, 'popularity'].mean()
+    listening_minutes = data['duration_minutes'].sum() 
+    avg_track_duration = data.loc[:,'duration_minutes'].mean()
+    unique_tracks = data['id'].nunique()
+    unique_artists = data['artist_id'].nunique()
 
-        k1.metric("Songs Played", f"{(data.shape)[0]:,}")
-        k2.metric("Average Artist Popularity", f"{average_popularity:.2f}")
-        k3.metric("Total Listening Time(Minutes)", f"{listening_minutes:.2f}")
-        k4.metric("Average Track Duration", f"{avg_track_duration:.2f}")
-        k5.metric("Unique Tracks Played", f"{unique_tracks}")
-        k6.metric("Unique Artists listened", f"{unique_artists}")
+    
+    k1.metric("Songs Played", f"{(data.shape)[0]:,}")
+    k3.metric("Total Listening Time(Minutes)", f"{listening_minutes:.2f}")
+    k4.metric("Average Track Duration", f"{avg_track_duration:.2f}")
+    k5.metric("Unique Tracks Played", f"{unique_tracks}")
+    k6.metric("Unique Artists listened", f"{unique_artists}")
 
     

@@ -30,3 +30,6 @@ Thumbs.db
 
 # Ignore the entire config folder
 config/
+*.otf
+*.woff2
+
