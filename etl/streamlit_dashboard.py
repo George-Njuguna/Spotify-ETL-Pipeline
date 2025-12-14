@@ -84,6 +84,10 @@ for df , name  in zip(overview_dfs,cols):
 
 tot_df = pd.DataFrame(tot_counts)
 
+ # getting max date and min date 
+max_date = recently_played_df["played_at"].max()
+min_date = recently_played_df["played_at"].min()
+
  # Setting Header
 st.title("SPOTIFY WRAPPED DASHBOARD")
 
@@ -186,6 +190,9 @@ with T1:
 
 
  # -------------- LISTENING STATS ------------------
+st.sidebar.markdown("---")
 
+start_dt = st.sidebar.date_input("From", min_value = min_date , max_value = max_date)
+end_dt = st.sidebar.date_input("To", min_value = min_date , max_value = max_date)
               
     
