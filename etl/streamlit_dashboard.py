@@ -216,11 +216,17 @@ with T2:
          # ------------KPI'S-------------
         k1, k2, k3, k4, k5, k6 = st.columns([1,1,1,1,1,1])
 
-        k1.metric("Listened_songs", f"{(data.shape)[0]:,}")
-        k2.metric("Average Artist Popularity", f"{(saved_albums_df.shape)[0]}")
-        k3.metric("Total Listening Minutes", f"{(playlists_df.shape)[0]}")
-        k4.metric("Average Track Duration", f"{(followed_artists_df.shape)[0]}")
-        k5.metric("Average Track Duration", f"{(followed_artists_df.shape)[0]}")
-        k6.metric("Average Track Duration", f"{(followed_artists_df.shape)[0]}")
+        average_popularity = data.loc[:, 'popularity'].mean()
+        listening_minutes = data['duration_minutes'].sum() 
+        avg_track_duration = data.loc[:,'duration_minutes'].mean()
+        unique_tracks = data['id'].nunique()
+        unique_artists = data['artist_id'].nunique()
+
+        k1.metric("Songs Played", f"{(data.shape)[0]:,}")
+        k2.metric("Average Artist Popularity", f"{average_popularity:.2f}")
+        k3.metric("Total Listening Time(Minutes)", f"{listening_minutes:.2f}")
+        k4.metric("Average Track Duration", f"{avg_track_duration:.2f}")
+        k5.metric("Unique Tracks Played", f"{unique_tracks}")
+        k6.metric("Unique Artists listened", f"{unique_artists}")
 
     
