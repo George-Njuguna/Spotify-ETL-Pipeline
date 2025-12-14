@@ -18,6 +18,41 @@ st.set_page_config(page_title="My Dashboard", layout="wide")
 
 st.markdown("""
 <style>
+div[data-testid="stMetricLabel"] {
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+div[data-testid="stMetricValue"] {
+    font-size: 1.6rem;
+    font-weight: 700;
+}
+</style>
+""", unsafe_allow_html=True)
+
+
+st.markdown("""
+<style>
+@font-face {
+    font-family: 'CircularStd';
+    src: url('file:///G:/PYTHON_PROJECTS/Scripts/airflow-docker/CircularStd-BookItalic.woff2') format('woff2');
+    font-weight: 400;
+    font-style: italic;
+}
+
+html, body, [class*="css"], div, span, p {
+    font-family: 'CircularStd', sans-serif;
+}
+
+/* Center KPI text */
+div[data-testid="stMetric"] {
+    text-align: center;
+}
+</style>
+""", unsafe_allow_html=True)
+
+st.markdown("""
+<style>
 div[data-testid="stMetric"] {
     text-align: center;
 }
