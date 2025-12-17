@@ -18,39 +18,83 @@ st.set_page_config(page_title="My Dashboard", layout="wide")
 
 st.markdown("""
 <style>
-div[data-testid="stMetricLabel"] {
-    font-size: 0.99rem;
-    font-weight: 800;
-}
+    .stApp {
+        background-color: #000000;
+    }
 
-div[data-testid="stMetricValue"] {
-    font-size: 1.6rem;
-    font-weight: 700;
-}
+    /* Container Styling (#212121 Palette) */
+    div[data-testid="stVerticalBlockBorderWrapper"] {
+        background-color: #212121 !important;
+        border: 1px solid #282828 !important;
+        border-radius: 8px;
+    }
 
-@font-face {
-    font-family: 'CircularStd';
-    src: url('file:///G:/PYTHON_PROJECTS/Scripts/airflow-docker/CircularStd-BookItalic.woff2') format('woff2');
-    font-weight: 800;
-    font-style: italic;
-}
+    /* Font Face and Global Typography */
+    @font-face {
+        font-family: 'CircularStd';
+        src: url('file:///G:/PYTHON_PROJECTS/Scripts/airflow-docker/CircularStd-BookItalic.woff2') format('woff2');
+        font-weight: 800;
+        font-style: italic;
+    }
 
-html, body, [class*="css"], div, span, p {
-    font-family: 'CircularStd', sans-serif;
-}
+    html, body, [class*="css"], div, span, p {
+        font-family: 'CircularStd', sans-serif;
+    }
 
-/* Center KPI text */
-div[data-testid="stMetric"] {
-    text-align: center;
-}
+    /* KPI / Metric Styling */
+    div[data-testid="stMetric"] {
+        text-align: center;
+    }
 
-.block-container {
-    padding-top: 1rem;
-    padding-left: 1rem;
-    padding-right: 1rem;
-}
+    div[data-testid="stMetricLabel"] {
+        font-size: 0.99rem;
+        font-weight: 800;
+    }
+
+    div[data-testid="stMetricValue"] {
+        font-size: 1.6rem;
+        font-weight: 700;
+    }
+
+    [data-testid="stMetricLabel"] p, 
+    [data-testid="stMetricValue"], 
+    h1, h2, h3, p {
+        color: white !important;
+    }
+    			
+    [data-testid="stMetricDelta"] > div {
+        color: #1DB954 !important;
+    }
+    
+    /* =====================
+    Text Hover Color
+    ===================== */
+
+    /* Hover effect for headings and paragraphs */
+    h1:hover, h2:hover, h3:hover, p:hover,
+    div[data-testid="stMetricLabel"] p:hover,
+    div[data-testid="stMetricValue"]:hover {
+        color: #1DB954 !important;  /* green on hover */
+        transition: color 0.2s ease;
+    }
+        
+    
+    /* Slightly lighter header for readability within the black table */
+    .stDataFrame [data-testid="stHeader"] {
+        background-color: #121212 !important; 
+    }
+
+    /* Layout Padding */
+    .block-container {
+        padding-top: 1rem;
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
 </style>
 """, unsafe_allow_html=True)
+
+
+
 
 plt.rcParams["figure.facecolor"] = "none"
 plt.rcParams["axes.facecolor"] = "none"
@@ -125,11 +169,13 @@ T1,T2,T3,T4,T5,T6 = st.tabs(["Overview", "Listening Stats", "Playlists", "Albums
 
  # --------------OVERVIEW--------------
 with T1:
-    k1, k2, k3, k4 = st.columns([1,1,1,1], border = True)
+
+    k1, k2, k3, k4 = st.columns([1,1,1,1], border=True)
     k1.metric("Saved Tracks", f"{(saved_tracks_df.shape)[0]:,}")
     k2.metric("Saved Albums", f"{(saved_albums_df.shape)[0]}")
     k3.metric("Playlists", f"{(playlists_df.shape)[0]}")
     k4.metric("Followed Artists", f"{(followed_artists_df.shape)[0]}")
+
 
     T1_col1, T1_col2 = st.columns([3, 1])
 
@@ -154,6 +200,17 @@ with T1:
                     marker=dict(color='#1DB954', size=6)
                 )
 
+                fig.update_layout(
+                    paper_bgcolor='rgba(0,0,0,0)',
+                    plot_bgcolor='rgba(0,0,0,0)',
+                    hovermode="x unified"
+                )
+
+                fig.update_layout( 
+                    xaxis=dict(showspikes=False),  
+                    yaxis=dict(showspikes=False)   
+                )
+
                 fig.update_traces(mode="lines+markers")
                 fig.update_xaxes(showgrid=False)
                 fig.update_xaxes(showline=False)
@@ -161,7 +218,7 @@ with T1:
                 fig.update_yaxes(showticklabels=False)
                 fig.update_layout(font=dict(family="CircularStd"))
 
-                st.plotly_chart(fig, width='stretch', theme="streamlit")
+                st.plotly_chart(fig, width='stretch', theme = None)
 
     
      # pie 
@@ -180,15 +237,26 @@ with T1:
             )
 
             fig.add_annotation(
-            text=f"{total_count:,} Genres",
-            x=0.5,            
-            y=0.5,             
-            showarrow=False,
-            font=dict(
-                size=18,
-                color="White"
+                text=f"{total_count:,} Genres",
+                x=0.5,            
+                y=0.5,             
+                showarrow=False,
+                font=dict(
+                    size=18,
+                    color="White"
+                )
+            ) 
+
+            fig.update_layout(
+                paper_bgcolor='rgba(0,0,0,0)',
+                plot_bgcolor='rgba(0,0,0,0)',
+                hovermode="x unified"
+            )         
+
+            fig.update_layout(
+                xaxis=dict(showspikes=False),  
+                yaxis=dict(showspikes=False)   
             )
-        ) 
 
             fig.update_traces(textinfo='none', rotation = 160) 
             fig.update_layout(title="Music Genres Overview")
@@ -214,6 +282,17 @@ with T1:
                     marker_line_width=0      
                 )
             
+            fig_bar.update_layout(
+                paper_bgcolor='rgba(0,0,0,0)',
+                plot_bgcolor='rgba(0,0,0,0)',
+                hovermode="x unified"
+            )
+
+            fig_bar.update_layout(
+                xaxis=dict(showspikes=False),  
+                yaxis=dict(showspikes=False)   
+            )
+            
             fig_bar.update_xaxes(showgrid=False)
             fig_bar.update_yaxes(showgrid=False)
             fig_bar.update_yaxes(showline=False)
@@ -227,9 +306,12 @@ with T1:
             with st.container():
                 table_data = ((recently_played_df.sort_values(by='played_at',ascending = False )).reset_index()).head(20)
                 table_data = table_data[["name", "artist_name", "album_name"]]
-                st.write("Recently Played Tracks")
-                st.dataframe(table_data, width="stretch") 
-
+                st.write("### Recently Played Tracks")
+                st.dataframe(
+                    table_data, 
+                    use_container_width=True,
+                    hide_index=True 
+                )
 
 
  # -------------- LISTENING STATS ------------------
@@ -297,6 +379,17 @@ with T2:
                     mode="lines+markers",
                     marker=dict(color='#1DB954', size=6)
                 )
+                
+                fig.update_layout(
+                    paper_bgcolor='rgba(0,0,0,0)',
+                    plot_bgcolor='rgba(0,0,0,0)',
+                    hovermode="x unified"
+                )
+
+                fig.update_layout( 
+                    xaxis=dict(showspikes=False),  
+                    yaxis=dict(showspikes=False)   
+                )
 
                 fig.update_traces(mode="lines+markers")
                 fig.update_xaxes(showgrid=False)
@@ -331,6 +424,17 @@ with T2:
                     xaxis_title=None,
                     yaxis_title=None,
                     bargap=0.2  
+                )
+
+                fig.update_layout(
+                    paper_bgcolor='rgba(0,0,0,0)',
+                    plot_bgcolor='rgba(0,0,0,0)',
+                    hovermode="x unified"
+                )
+
+                fig.update_layout( 
+                    xaxis=dict(showspikes=False),  
+                    yaxis=dict(showspikes=False)   
                 )
 
                 st.plotly_chart(fig, use_container_width=True, theme="streamlit", key="listening_stats_bar_chart")
