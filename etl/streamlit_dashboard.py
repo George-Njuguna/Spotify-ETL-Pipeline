@@ -135,13 +135,13 @@ with T1:
 
      # line graph 
     listening_hourly = recently_played_df.resample("d", on="played_at")["duration_minutes"].sum().rolling(3).mean().rename("All").reset_index()
-    df_melted = listening_hourly.rename(columns={"All": "Total Listening Time (Minute)", "played_at" : "Time of day"})
+    df_melted = listening_hourly.rename(columns={"All": "Total Listening Time (Minute)", "played_at" : "Day"})
 
     with T1_col1:
             with st.container(border=True):
                 fig = px.line(
                     df_melted,
-                    x="Time of day",
+                    x="Day",
                     y="Total Listening Time (Minute)",
                     line_shape="spline",
                     title="Daily Listening Trend"
@@ -266,26 +266,64 @@ with T2:
     with T2_col1:
         with st.container(border=True):
             # ---------- Line Graph ----------
-            if day_diff > 1:
-                    listening_hourly = data.resample("d", on="played_at")["duration_minutes"].sum().rolling(3).mean().rename("All").reset_index()
-                    df_melted = listening_hourly.rename(columns={"All": "Total Listening Time (Minute)", "played_at" : "Day"})
+            if day_diff > 3:
+                listening_hourly = data.resample("d", on="played_at")["duration_minutes"].sum().rolling(3).mean().rename("All").reset_index()
+                df_melted = listening_hourly.rename(columns={"All": "Total Listening Time (Minute)", "played_at" : "Day"})
 
-                    fig = px.area(
-                    df_melted,
-                    x="Day",
-                    y="Total Listening Time (Minute)",
-                    line_shape="spline",
-                    title="Daily Listening Trend"
-                    )
+                fig = px.area(
+                df_melted,
+                x="Day",
+                y="Total Listening Time (Minute)",
+                line_shape="spline",
+                title="Daily Listening Trend"
+                )
 
-                    fig.update_traces(mode="lines+markers")
-                    fig.update_xaxes(showgrid=False)
-                    fig.update_xaxes(showline=False)
-                    fig.update_yaxes(showgrid=False)
-                    fig.update_yaxes(showticklabels=False)
-                    fig.update_layout(font=dict(family="CircularStd"))
+                fig.update_traces(
+                    line_color='#1DB954',
+                    fillcolor='rgba(29, 185, 84, 0.3)',
+                    mode="lines+markers",
+                    marker=dict(color='#1DB954', size=6)
+                )
 
-                    st.plotly_chart(fig, width='stretch', theme="streamlit", key = "listening stats line Graph")
+                fig.update_traces(mode="lines+markers")
+                fig.update_xaxes(showgrid=False)
+                fig.update_xaxes(showline=False)
+                fig.update_yaxes(showgrid=False)
+                fig.update_yaxes(showticklabels=False)
+                fig.update_layout(font=dict(family="CircularStd"))
+
+                st.plotly_chart(fig, width='stretch', theme="streamlit", key = "listening stats line Graph")
+
+            if day_diff <= 3:
+
+                listening_hourly = data.resample("h", on="played_at")["duration_minutes"].sum().rolling(3).mean().rename("All").reset_index()
+                df_melted = listening_hourly.rename(columns={"All": "Total Listening Time (Minute)", "played_at" : "Time of Day"})
+
+                fig = px.bar(
+                df_melted,
+                x="Time of Day",
+                y="Total Listening Time (Minute)",
+                title="Hourly Listening Trend"
+                )
+
+                fig.update_traces(
+                    marker_color='#1DB954',  
+                    marker_line_width=0      
+                )
+            
+                fig.update_xaxes(showgrid=False)
+                fig.update_yaxes(showgrid=False, showticklabels=False)
+                fig.update_layout(
+                    font=dict(family="CircularStd"),
+                    xaxis_title=None,
+                    yaxis_title=None,
+                    bargap=0.2  
+                )
+
+                st.plotly_chart(fig, use_container_width=True, theme="streamlit", key="listening_stats_bar_chart")
+                 
+                 
+
 
 
 
