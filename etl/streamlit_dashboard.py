@@ -147,6 +147,13 @@ with T1:
                     title="Daily Listening Trend"
                 )
 
+                fig.update_traces(
+                    line_color='#1DB954',
+                    fillcolor='rgba(29, 185, 84, 0.3)',
+                    mode="lines+markers",
+                    marker=dict(color='#1DB954', size=6)
+                )
+
                 fig.update_traces(mode="lines+markers")
                 fig.update_xaxes(showgrid=False)
                 fig.update_xaxes(showline=False)
@@ -201,6 +208,12 @@ with T1:
                 y="counts",
                 title="Library at a Glance"
             )
+
+            fig_bar.update_traces(
+                    marker_color='#1DB954',  
+                    marker_line_width=0      
+                )
+            
             fig_bar.update_xaxes(showgrid=False)
             fig_bar.update_yaxes(showgrid=False)
             fig_bar.update_yaxes(showline=False)
