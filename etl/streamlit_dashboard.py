@@ -144,7 +144,7 @@ with T1:
                     x="Time of day",
                     y="Total Listening Time (Minute)",
                     line_shape="spline",
-                    title="Hourly Listening Trend"
+                    title="Daily Listening Trend"
                 )
 
                 fig.update_traces(mode="lines+markers")
@@ -275,7 +275,7 @@ with T2:
                     x="Day",
                     y="Total Listening Time (Minute)",
                     line_shape="spline",
-                    title="Hourly Listening Trend"
+                    title="Daily Listening Trend"
                     )
 
                     fig.update_traces(mode="lines+markers")
