@@ -65,7 +65,7 @@ st.markdown("""
     [data-testid="stMetricDelta"] > div {
         color: #1DB954 !important;
     }
-    
+
     /* =====================
     Text Hover Color
     ===================== */
