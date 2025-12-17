@@ -208,7 +208,7 @@ with T1:
             fig_bar.update_yaxes(showticklabels=False)
             fig_bar.update_layout(font=dict(family="CircularStd"))
 
-            st.plotly_chart(fig_bar, width="stretch", theme="streamlit")
+            st.plotly_chart(fig_bar, width="stretch", theme="streamlit", key = "overview line graph")
 
     with T1_col4:
             with st.container():
@@ -231,14 +231,17 @@ with T2:
     if start_dt is not  None and end_dt is None: # only the start date
         filter = recently_played_df['played_at_date'] == start_dt 
         data = recently_played_df[filter]
+        day_diff = 1
 
     elif start_dt is not None and end_dt is not None:
         filter = ((recently_played_df['played_at_date'] >= start_dt) & (recently_played_df['played_at_date'] <= end_dt))
         data = recently_played_df[filter]
+        day_diff = (end_dt - start_dt).days
     
     else:
         filter = ((recently_played_df['played_at_date'] >= min_date) & (recently_played_df['played_at_date'] <= max_date))
         data = recently_played_df
+        day_diff = (data['played_at_date'].max() - data['played_at_date'].min()).days
 
     # ------------KPI'S-------------
     k1, k3, k4, k5, k6 = st.columns([1, 1, 1, 1, 1], border = True)
@@ -256,4 +259,39 @@ with T2:
     k5.metric("Unique Tracks Played", f"{unique_tracks}")
     k6.metric("Unique Artists listened", f"{unique_artists}")
 
+    # ------------- Columns ------------
+    T2_col1, T2_col2 = st.columns([3, 1])
     
+
+    with T2_col1:
+        with st.container(border=True):
+            # ---------- Line Graph ----------
+            if day_diff > 1:
+                    listening_hourly = data.resample("d", on="played_at")["duration_minutes"].sum().rolling(3).mean().rename("All").reset_index()
+                    df_melted = listening_hourly.rename(columns={"All": "Total Listening Time (Minute)", "played_at" : "Day"})
+
+                    fig = px.area(
+                    df_melted,
+                    x="Day",
+                    y="Total Listening Time (Minute)",
+                    line_shape="spline",
+                    title="Hourly Listening Trend"
+                    )
+
+                    fig.update_traces(mode="lines+markers")
+                    fig.update_xaxes(showgrid=False)
+                    fig.update_xaxes(showline=False)
+                    fig.update_yaxes(showgrid=False)
+                    fig.update_yaxes(showticklabels=False)
+                    fig.update_layout(font=dict(family="CircularStd"))
+
+                    st.plotly_chart(fig, width='stretch', theme="streamlit", key = "listening stats line Graph")
+
+
+
+
+                 
+                 
+         
+        
+        
