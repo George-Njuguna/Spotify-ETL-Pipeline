@@ -99,6 +99,8 @@ plt.rcParams["ytick.color"] = "white"
 plt.rcParams["legend.labelcolor"] = "white"
 plt.rcParams["axes.titlecolor"] = "white"
 
+spotify_palette = ["#1DB954", "#005F73", "#0A9396", "#94D2BD", "#E9D8A6", "#EE9B00", "#CA6702", "#BB3E03", "#AE2012", "#9B2226", "#643C94"]
+
 
 
 # Cache the connection
@@ -218,15 +220,25 @@ with T1:
      # pie 
     with T1_col2:
          with st.container(border=True):
-            data = genre_df["genre"].value_counts()
+            genre_counts = genre_df["genre"].value_counts().reset_index()
+            genre_counts.columns = ['genre', 'count']
+            top_10 = genre_counts.head(10)
+            others_count = genre_counts.iloc[10:]['count'].sum()
+            
+             # combining top 10 genres with other genres
+            other_row = pd.DataFrame([{'genre': 'Other', 'count': others_count}])
+            plot_df = pd.concat([top_10, other_row], ignore_index=True)
 
-            pie_labels = data.index
-            pie_values = data.values
+            pie_labels = plot_df.index
+            pie_values = plot_df.values
             total_count = genre_df["genre"].nunique()
+            
 
             fig = px.pie(
-                names=pie_labels,
-                values=pie_values,
+                plot_df,
+                names="genre",
+                values="count",
+                color_discrete_sequence=spotify_palette,
                 hole=0.8 
             )
 
