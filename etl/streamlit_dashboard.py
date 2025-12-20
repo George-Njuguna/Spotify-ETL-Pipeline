@@ -313,6 +313,14 @@ with T1:
                     hide_index=True 
                 )
 
+ # ----------Map of Days----------
+day_dict = {
+        7 : "From Past Week",
+        14 : "From Past Two Weeks",
+        21 : "From Past Three Weeks",
+        30 : "From Past Month",
+        31 : "From Past Month" 
+ }
 
  # -------------- LISTENING STATS ------------------
 with T2:
@@ -327,32 +335,60 @@ with T2:
         filter = recently_played_df['played_at_date'] == start_dt 
         data = recently_played_df[filter]
         day_diff = 1
+        prev_date = start_dt - pd.Timedelta(days=day_diff)
+        mess = mess = "From Past day"
 
     elif start_dt is not None and end_dt is not None:
         filter = ((recently_played_df['played_at_date'] >= start_dt) & (recently_played_df['played_at_date'] <= end_dt))
         data = recently_played_df[filter]
         day_diff = (end_dt - start_dt).days
+        prev_date = start_dt - pd.Timedelta(days=day_diff)
+
+        sec_filter = ((recently_played_df['played_at_date'] >= prev_date) & (recently_played_df['played_at_date'] < start_dt))
+        sec_data = recently_played_df[sec_filter]
     
     else:
         filter = ((recently_played_df['played_at_date'] >= min_date) & (recently_played_df['played_at_date'] <= max_date))
         data = recently_played_df
         day_diff = (data['played_at_date'].max() - data['played_at_date'].min()).days
 
-    # ------------KPI'S-------------
-    k1, k3, k4, k5, k6 = st.columns([1, 1, 1, 1, 1], border = True)
 
-    average_popularity = data.loc[:, 'popularity'].mean()
-    listening_minutes = data['duration_minutes'].sum() 
-    avg_track_duration = data.loc[:,'duration_minutes'].mean()
-    unique_tracks = data['id'].nunique()
-    unique_artists = data['artist_id'].nunique()
+    mess = day_dict.get(day_diff, f"From Past {day_diff} Days")
 
     
-    k1.metric("Songs Played", f"{(data.shape)[0]:,}")
-    k3.metric("Total Listening Time(Minutes)", f"{listening_minutes:.2f}")
-    k4.metric("Average Track Duration", f"{avg_track_duration:.2f}")
-    k5.metric("Unique Tracks Played", f"{unique_tracks}")
-    k6.metric("Unique Artists listened", f"{unique_artists}")
+    # ------- songs played  -------
+    songs_played = (data.shape)[0]
+    prev_songs_played = (sec_data.shape)[0]
+
+    # ------- Average Popularity -------
+    average_popularity = data.loc[:, 'popularity'].mean()
+    prev_avg_popularity = sec_data.loc[:, 'popularity'].mean() if (sec_data.shape)[0] > 0 else np.nan
+
+    # ------- listening minutes -------
+    listening_minutes = data['duration_minutes'].sum() 
+    prev_listening_minutes = sec_data['duration_minutes'].sum() if (sec_data.shape)[0] > 0 else np.nan
+
+    # ------- Track duration -------
+    avg_track_duration = data.loc[:,'duration_minutes'].mean()
+    prev_avg_duration = sec_data.loc[:,'duration_minutes'].mean() if (sec_data.shape)[0] > 0 else np.nan
+
+    # ------- unique tracks -------
+    unique_tracks = data['id'].nunique()
+    prev_unique_tracks = sec_data['id'].nunique() if (sec_data.shape)[0] > 0 else np.nan
+
+    # ------- unique artists -------
+    unique_artists = data['artist_id'].nunique()
+    prev_unique_artists = sec_data['artist_id'].nunique() if (sec_data.shape)[0] > 0 else np.nan
+
+
+     # ------------KPI'S-------------
+    k1, k3, k4, k5, k6 = st.columns([1, 1, 1, 1, 1], border = True)
+
+    k1.metric("Songs Played", f"{songs_played}" , f"{prev_songs_played} {mess}")
+    k3.metric("Total Listening Time(Minutes)", f"{listening_minutes:.2f}", f"{prev_listening_minutes:.2f} {mess}")
+    k4.metric("Average Track Duration", f"{avg_track_duration:.2f}", f"{prev_avg_duration:.2f} {mess}")
+    k5.metric("Unique Tracks Played", f"{unique_tracks}", f"{prev_unique_tracks} {mess}")
+    k6.metric("Unique Artists listened", f"{unique_artists}", f"{prev_unique_artists} {mess}")
 
     # ------------- Columns ------------
     T2_col1, T2_col2 = st.columns([3, 1])
@@ -439,7 +475,7 @@ with T2:
 
                 st.plotly_chart(fig, use_container_width=True, theme="streamlit", key="listening_stats_bar_chart")
 
-                #------------
+                #------------ 
                  
                  
 
