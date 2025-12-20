@@ -136,8 +136,9 @@ dataframes = [playlists_df , followed_artists_df , saved_albums_df, recently_pla
 
  # Creating a column duration minutes and changing played at to date and getting the day
 recently_played_df["duration_minutes"] = pd.to_timedelta(recently_played_df["duration"], unit='ms') / pd.Timedelta(minutes=1) 
+recently_played_df['played_at'] = pd.to_datetime(recently_played_df['played_at'])
 recently_played_df['played_at_date'] = recently_played_df['played_at'].dt.tz_localize(None).dt.date
-recently_played_df['day'] = recently_played_df['played_at_date'].dt.day_name()
+recently_played_df['day'] = recently_played_df['played_at'].dt.day_name()
 
  # Setting time Frames
 def get_timeframe(hour):
@@ -157,7 +158,7 @@ def get_timeframe(hour):
         # 21-24 and 0-5
         return 'Night'
     
-recently_played_df["time_frames"] = recently_played_df['played_at_date'].dt.hour.apply(get_timeframe)
+recently_played_df["time_frames"] = recently_played_df['played_at'].dt.hour.apply(get_timeframe)
 
 
  # creating a table containing totals 
@@ -390,6 +391,7 @@ with T2:
         prev_date = start_dt - pd.Timedelta(days=day_diff)
         sec_filter = ((recently_played_df['played_at_date'] >= prev_date) & (recently_played_df['played_at_date'] < start_dt))
         sec_data = recently_played_df[sec_filter]
+        
 
 
     mess = day_dict.get(day_diff, f"From Past {day_diff} Days")
@@ -514,7 +516,75 @@ with T2:
 
                 st.plotly_chart(fig, use_container_width=True, theme="streamlit", key="listening_stats_bar_chart")
 
-                #------------ 
+    # ----------- barh plot ------------
+    with T2_col2:
+        with st.container(border=True):
+            if start_dt is  None and end_dt is None:
+                filter = ((recently_played_df['played_at_date'] >= start_dt) & (recently_played_df['played_at_date'] <= end_dt))
+                data = recently_played_df[filter]
+
+            else:
+                week_end_dt = start_dt + pd.Timedelta(days=7)
+                filter = ((recently_played_df['played_at_date'] >= start_dt) & (recently_played_df['played_at_date'] <= week_end_dt))
+                data = recently_played_df[filter]
+
+            # -------getting sum of listening minutes by day ----------
+            barh_data = (data.groupby("day")['duration_minutes'].sum().sort_values(ascending = True)).reset_index()
+            barh_data.columns = ['Days', 'Minutes Listened']
+            total_minutes = barh_data['Minutes Listened'].sum()
+            barh_data['percent'] = (barh_data['Minutes Listened'] / total_minutes * 100).round(1).astype(str) + '%'
+            max_val = barh_data['Minutes Listened'].max()
+            colors = ['#EC5800' if val == max_val else '#1DB954' for val in barh_data['Minutes Listened']]
+
+            fig = px.bar(
+                barh_data,
+                x='Minutes Listened',
+                y='Days',
+                orientation='h',
+                title="Top Listening Days",
+                custom_data=['percent']
+            )
+
+            # 3. Update Hover and Styling
+            fig.update_traces(
+                marker_color=colors,
+                hovertemplate="<b>%{y}</b><br>Minutes: %{x}<br>Share: %{customdata[0]}<extra></extra>",
+                marker_line_width=0
+            )
+            
+            fig.update_traces(
+                    marker_color=colors,
+                    marker_line_width=0,
+                    textposition='outside',
+                    textfont_size=14, 
+                    cliponaxis=False      
+                )
+            
+            fig.update_xaxes(showgrid=False)
+            fig.update_yaxes(showgrid=False, showticklabels=True, tickfont=dict(size=14, color='white'))
+            fig.update_layout(
+                font=dict(family="CircularStd"),
+                xaxis_title=None,
+                yaxis_title=None,
+                showlegend=False, 
+                margin=dict(l=150),
+                bargap=0.2  
+            )
+
+            fig.update_layout(
+                paper_bgcolor='rgba(0,0,0,0)',
+                plot_bgcolor='rgba(0,0,0,0)',
+                hovermode="x unified"
+            )
+
+            fig.update_layout( 
+                xaxis=dict(showspikes=False),  
+                yaxis=dict(showspikes=False)   
+            )
+
+            # 4. Render
+            st.plotly_chart(fig, use_container_width=True, theme=None, key="genre_barh_plot")
+
                  
                  
 
