@@ -157,7 +157,7 @@ def get_timeframe(hour):
         # 21-24 and 0-5
         return 'Night'
     
-recently_played_df["time_frames"] = df['played_at_date'].dt.hour.apply(get_timeframe)
+recently_played_df["time_frames"] = recently_played_df['played_at_date'].dt.hour.apply(get_timeframe)
 
 
  # creating a table containing totals 
