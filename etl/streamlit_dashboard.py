@@ -259,6 +259,11 @@ with T1:
                 hovermode="x unified"
             )         
 
+            fig.update_traces(
+                textinfo='percent+label', 
+                hovertemplate="<b>%{label}</b><br>Count: %{value}<br>Percentage: %{percent}<extra></extra>"
+            )
+
             fig.update_layout(
                 xaxis=dict(showspikes=False),  
                 yaxis=dict(showspikes=False)   
