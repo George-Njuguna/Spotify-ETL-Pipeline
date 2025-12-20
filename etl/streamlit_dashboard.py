@@ -61,10 +61,6 @@ st.markdown("""
     h1, h2, h3, p {
         color: white !important;
     }
-    			
-    [data-testid="stMetricDelta"] > div {
-        color: #1DB954 !important;
-    }
 
     /* =====================
     Text Hover Color
@@ -92,8 +88,6 @@ st.markdown("""
     }
 </style>
 """, unsafe_allow_html=True)
-
-
 
 
 plt.rcParams["figure.facecolor"] = "none"
@@ -364,37 +358,37 @@ with T2:
     
     # ------- songs played  -------
     songs_played = (data.shape)[0]
-    prev_songs_played = (sec_data.shape)[0]
+    prev_songs_played = ((songs_played - (sec_data.shape)[0]) / (sec_data.shape)[0])*100 if (sec_data.shape)[0] > 0 else 0
 
     # ------- Average Popularity -------
     average_popularity = data.loc[:, 'popularity'].mean()
-    prev_avg_popularity = sec_data.loc[:, 'popularity'].mean() if (sec_data.shape)[0] > 0 else np.nan
+    prev_avg_popularity = ((average_popularity - sec_data.loc[:, 'popularity'].mean()) / sec_data.loc[:, 'popularity'].mean()) * 100 if (sec_data.shape)[0] > 0 else np.nan
 
     # ------- listening minutes -------
     listening_minutes = data['duration_minutes'].sum() 
-    prev_listening_minutes = sec_data['duration_minutes'].sum() if (sec_data.shape)[0] > 0 else np.nan
+    prev_listening_minutes = ((listening_minutes - sec_data['duration_minutes'].sum()) / sec_data['duration_minutes'].sum()) * 100 if (sec_data.shape)[0] > 0 else np.nan
 
     # ------- Track duration -------
     avg_track_duration = data.loc[:,'duration_minutes'].mean()
-    prev_avg_duration = sec_data.loc[:,'duration_minutes'].mean() if (sec_data.shape)[0] > 0 else np.nan
+    prev_avg_duration = ((avg_track_duration - sec_data.loc[:,'duration_minutes'].mean()) / sec_data.loc[:,'duration_minutes'].mean()) * 100 if (sec_data.shape)[0] > 0 else np.nan
 
     # ------- unique tracks -------
     unique_tracks = data['id'].nunique()
-    prev_unique_tracks = sec_data['id'].nunique() if (sec_data.shape)[0] > 0 else np.nan
+    prev_unique_tracks = ((unique_tracks - sec_data['id'].nunique()) / sec_data['id'].nunique()) * 100 if (sec_data.shape)[0] > 0 else np.nan
 
     # ------- unique artists -------
     unique_artists = data['artist_id'].nunique()
-    prev_unique_artists = sec_data['artist_id'].nunique() if (sec_data.shape)[0] > 0 else np.nan
+    prev_unique_artists = ((unique_artists - sec_data['artist_id'].nunique()) / sec_data['artist_id'].nunique()) * 100 if (sec_data.shape)[0] > 0 else np.nan
 
 
      # ------------KPI'S-------------
     k1, k3, k4, k5, k6 = st.columns([1, 1, 1, 1, 1], border = True)
 
-    k1.metric("Songs Played", f"{songs_played}" , f"{prev_songs_played} {mess}")
-    k3.metric("Total Listening Time(Minutes)", f"{listening_minutes:.2f}", f"{prev_listening_minutes:.2f} {mess}")
-    k4.metric("Average Track Duration", f"{avg_track_duration:.2f}", f"{prev_avg_duration:.2f} {mess}")
-    k5.metric("Unique Tracks Played", f"{unique_tracks}", f"{prev_unique_tracks} {mess}")
-    k6.metric("Unique Artists listened", f"{unique_artists}", f"{prev_unique_artists} {mess}")
+    k1.metric("Songs Played", f"{songs_played}" , f"{prev_songs_played:.2f}% {mess}")
+    k3.metric("Total Listening Time(Minutes)", f"{listening_minutes:.2f}", f"{prev_listening_minutes:.2f}%  {mess}")
+    k4.metric("Average Track Duration", f"{avg_track_duration:.2f}", f"{prev_avg_duration:.2f}%  {mess}")
+    k5.metric("Unique Tracks Played", f"{unique_tracks}", f"{prev_unique_tracks:.2f}%  {mess}")
+    k6.metric("Unique Artists listened", f"{unique_artists}", f"{prev_unique_artists:.2f}%  {mess}")
 
     # ------------- Columns ------------
     T2_col1, T2_col2 = st.columns([3, 1])
