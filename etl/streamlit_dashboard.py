@@ -336,7 +336,9 @@ with T2:
         data = recently_played_df[filter]
         day_diff = 1
         prev_date = start_dt - pd.Timedelta(days=day_diff)
-        mess = mess = "From Past day"
+
+        sec_filter = ((recently_played_df['played_at_date'] >= prev_date) & (recently_played_df['played_at_date'] < start_dt))
+        sec_data = recently_played_df[sec_filter]
 
     elif start_dt is not None and end_dt is not None:
         filter = ((recently_played_df['played_at_date'] >= start_dt) & (recently_played_df['played_at_date'] <= end_dt))
@@ -350,7 +352,11 @@ with T2:
     else:
         filter = ((recently_played_df['played_at_date'] >= min_date) & (recently_played_df['played_at_date'] <= max_date))
         data = recently_played_df
+        start_dt = data['played_at_date'].min()
         day_diff = (data['played_at_date'].max() - data['played_at_date'].min()).days
+        prev_date = start_dt - pd.Timedelta(days=day_diff)
+        sec_filter = ((recently_played_df['played_at_date'] >= prev_date) & (recently_played_df['played_at_date'] < start_dt))
+        sec_data = recently_played_df[sec_filter]
 
 
     mess = day_dict.get(day_diff, f"From Past {day_diff} Days")
