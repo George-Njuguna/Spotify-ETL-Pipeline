@@ -134,9 +134,31 @@ playlist_songs_df = load_cached_data("playlist_tracks")
 
 dataframes = [playlists_df , followed_artists_df , saved_albums_df, recently_played_df, top_artists_df, top_tracks_df, saved_tracks_df , genre_df , playlist_songs_df]
 
- # Creating a column duration minutes and changing played at to date 
+ # Creating a column duration minutes and changing played at to date and getting the day
 recently_played_df["duration_minutes"] = pd.to_timedelta(recently_played_df["duration"], unit='ms') / pd.Timedelta(minutes=1) 
 recently_played_df['played_at_date'] = recently_played_df['played_at'].dt.tz_localize(None).dt.date
+recently_played_df['day'] = recently_played_df['played_at_date'].dt.day_name()
+
+ # Setting time Frames
+def get_timeframe(hour):
+    if  hour >= 6 and hour < 11:
+        return 'Morning'
+    elif hour >= 11 and hour < 12:
+        return "Late Morning"
+    elif hour >= 11 and hour < 12:
+        return "Midday"
+    elif hour > 12 and hour < 15:
+        return 'Late AfterNoon'
+    elif hour >= 15 and hour < 17:
+        return "AfterNoon"
+    elif hour >= 17 and hour < 21:
+        return 'Evening'
+    else:
+        # 21-24 and 0-5
+        return 'Night'
+    
+recently_played_df["time_frames"] = df['played_at_date'].dt.hour.apply(get_timeframe)
+
 
  # creating a table containing totals 
 overview_dfs = [playlists_df , followed_artists_df , saved_albums_df, saved_tracks_df ]
