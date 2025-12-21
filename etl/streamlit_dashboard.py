@@ -517,7 +517,7 @@ with T2:
                     yaxis=dict(showspikes=False)   
                 )
 
-                st.plotly_chart(fig, use_container_width=True, theme="streamlit", key="listening_stats_bar_chart")
+                st.plotly_chart(fig, width = "stretch", theme="streamlit", key="listening_stats_bar_chart")
 
     # ----------- barh plot ------------
     with T2_col2:
@@ -584,7 +584,7 @@ with T2:
                 xaxis=dict(showspikes=False),  
                 yaxis=dict(showspikes=False)   
             )
-            st.plotly_chart(fig, use_container_width=True, theme=None, key="genre_barh_plot")
+            st.plotly_chart(fig, width = "stretch", theme=None, key="genre_barh_plot")
 
 
     # --------- Columns -----------
@@ -592,17 +592,17 @@ with T2:
 
     with T2_col3:
         with st.container(border=True):
-            if start_dt is None and end_dt is None:
-                filter = ((recently_played_df['played_at_date'] >= min_date) & (recently_played_df['played_at_date'] <= max_date))
-                data = recently_played_df[filter]
-                print(data)
 
-            elif start_dt is not None and end_dt is None:
+            if start_dt is not None and end_dt is None:
                 filter = recently_played_df['played_at_date'] == start_dt
                 data = recently_played_df[filter]
 
-            else:
+            elif start_dt is not None and end_dt is not None:
                 filter = ((recently_played_df['played_at_date'] >= start_dt) & (recently_played_df['played_at_date'] <= end_dt))
+                data = recently_played_df[filter]
+
+            else :
+                filter = ((recently_played_df['played_at_date'] >= min_date) & (recently_played_df['played_at_date'] <= max_date))
                 data = recently_played_df[filter]
 
             # --------- Buble Chart ---------
@@ -689,7 +689,7 @@ with T2:
                 hoverlabel=dict(bgcolor="#212121", font_size=14, font_family="CircularStd")
             )
 
-            st.plotly_chart(fig, use_container_width=True, theme=None, key="Bubble Chart")
+            st.plotly_chart(fig, width = "stretch", theme=None, key="Bubble Chart")
 
                  
                  
