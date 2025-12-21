@@ -361,22 +361,24 @@ with T2:
     with st.expander("⚙ Filters"):
         enable_date_filter = st.checkbox("Filter by date", value=False)
 
-    col_f1, col_f2 = st.columns(2)
-    with col_f1:
-        start_dt = st.date_input(
-            "From",
-            min_value=min_date,
-            max_value=max_date,
-            disabled=not enable_date_filter
-        )
+        col_f1, col_f2 = st.columns(2)
+        with col_f1:
+            start_dt = st.date_input(
+                "From",
+                value=min_date, 
+                min_value=min_date,
+                max_value=max_date,
+                disabled=not enable_date_filter
+            )
 
-    with col_f2:
-        end_dt = st.date_input(
-            "To",
-            min_value=start_dt,
-            max_value=max_date,
-            disabled=not enable_date_filter
-        )
+        with col_f2:
+            end_dt = st.date_input(
+                "To",
+                value=None, 
+                min_value=start_dt,
+                max_value=max_date,
+                disabled=not enable_date_filter
+            )
 
     if not enable_date_filter : # all Data
         filter = ((recently_played_df['played_at_date'] >= min_date) & (recently_played_df['played_at_date'] <= max_date))
@@ -628,7 +630,7 @@ with T2:
 
             positions = {
                 "Morning": [0, 0],
-                "Late Morning": [1.1, 0.8],
+                "Late Morning": [1.0, 0.8],
                 "Midday": [-1.1, 0.5],
                 "Late AfterNoon": [0.2, -1.2],
                 "AfterNoon": [-0.8, -0.8],
