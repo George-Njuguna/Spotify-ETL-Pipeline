@@ -432,7 +432,7 @@ with T2:
     k6.metric("Unique Artists listened", f"{unique_artists}", f"{prev_unique_artists:.2f}%  {mess}")
 
     # ------------- Columns ------------
-    T2_col1, T2_col2 = st.columns([3, 1])
+    T2_col1, T2_col2 = st.columns([2, 1])
     
 
     with T2_col1:
@@ -477,10 +477,13 @@ with T2:
 
                 st.plotly_chart(fig, width='stretch', theme="streamlit", key = "listening stats line Graph")
 
+             # ---------- Bar Plot -----------
             if day_diff <= 3:
 
                 listening_hourly = data.resample("h", on="played_at")["duration_minutes"].sum().rolling(3).mean().rename("All").reset_index()
                 df_melted = listening_hourly.rename(columns={"All": "Total Listening Time (Minute)", "played_at" : "Time of Day"})
+                max_val = df_melted['Total Listening Time (Minute)'].max()
+                colors = ['#EC5800' if val == max_val else '#1DB954' for val in df_melted['Total Listening Time (Minute)']]
 
                 fig = px.bar(
                 df_melted,
@@ -490,7 +493,7 @@ with T2:
                 )
 
                 fig.update_traces(
-                    marker_color='#1DB954',  
+                    marker_color=colors,  
                     marker_line_width=0      
                 )
             
