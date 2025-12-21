@@ -523,7 +523,7 @@ with T2:
     with T2_col2:
         with st.container(border=True):
             if start_dt is  None and end_dt is None:
-                filter = ((recently_played_df['played_at_date'] >= start_dt) & (recently_played_df['played_at_date'] <= end_dt))
+                filter = ((recently_played_df['played_at_date'] >= min_date) & (recently_played_df['played_at_date'] <= max_date))
                 data = recently_played_df[filter]
 
             else:
@@ -584,9 +584,114 @@ with T2:
                 xaxis=dict(showspikes=False),  
                 yaxis=dict(showspikes=False)   
             )
-
-            # 4. Render
             st.plotly_chart(fig, use_container_width=True, theme=None, key="genre_barh_plot")
+
+
+    # --------- Columns -----------
+    T2_col3, T2_col4 = st.columns([1, 1])
+
+    with T2_col3:
+        with st.container(border=True):
+            if start_dt is  None and end_dt is None:
+                filter = ((recently_played_df['played_at_date'] >= min_date) & (recently_played_df['played_at_date'] <= max_date))
+                data = recently_played_df[filter]
+
+            elif start_dt is not None and end_dt is None:
+                filter = recently_played_df['played_at_date'] >= start_dt
+                data = recently_played_df[filter]
+
+            else:
+                filter = ((recently_played_df['played_at_date'] >= start_dt) & (recently_played_df['played_at_date'] <= end_dt))
+                data = recently_played_df[filter]
+
+            # --------- Buble Chart ---------
+            bubble_data = data.groupby('time_frames')['duration_minutes'].sum().reset_index()
+            bubble_data.columns = ['Timeframe', 'Total Minutes']
+            max_val = bubble_data['Total Minutes'].max()
+
+            positions = {
+                "Morning": [0, 0],
+                "Late Morning": [1.1, 0.8],
+                "Midday": [-1.1, 0.5],
+                "Late AfterNoon": [0.2, -1.2],
+                "AfterNoon": [-0.8, -0.8],
+                "Evening": [-0.5, 1.3],
+                "Night": [0.9, -0.6]
+            }
+
+            # Map positions to your data
+            bubble_data['x'] = bubble_data['Timeframe'].map(lambda x: positions.get(x, [np.random.uniform(-1,1), np.random.uniform(-1,1)])[0])
+            bubble_data['y'] = bubble_data['Timeframe'].map(lambda x: positions.get(x, [0, 0])[1])
+            total_all_minutes = bubble_data['Total Minutes'].sum()
+            bubble_data['percent'] = (bubble_data['Total Minutes'] / total_all_minutes * 100).round(1).astype(str) + '%'
+
+            # 1. Calculate percentage for display
+            total_all_minutes = bubble_data['Total Minutes'].sum()
+            bubble_data['percent'] = (bubble_data['Total Minutes'] / total_all_minutes * 100).round(1).astype(str) + '%'
+
+            # 2. Sizing logic
+            max_bubble_size = 180  
+            min_bubble_size = 50   
+            max_mins = bubble_data['Total Minutes'].max()
+
+            bubble_data['scaled_size'] = bubble_data['Total Minutes'].apply(
+                lambda x: min_bubble_size + (np.sqrt(x) / np.sqrt(max_mins)) * (max_bubble_size - min_bubble_size)
+            )
+
+            fig = go.Figure()
+
+            vibrant_palette = ["#1DB954", "#00E5FF", "#7000FF", "#FF007A", "#FFD700", "#94D2BD", "#E9D8A6"]
+
+            for i, row in enumerate(bubble_data.itertuples()):
+                # Robust data access
+                total_mins = int(getattr(row, 'Total_Minutes', row[2]))
+                
+                fig.add_trace(go.Scatter(
+                    x=[row.x],
+                    y=[row.y],
+                    mode="markers+text", 
+                    name=str(row.Timeframe), # This is what %{fullData.name} will read
+                    customdata=[[row.percent, total_mins]], 
+                    marker=dict(
+                        size=[row.scaled_size], 
+                        sizemode='diameter',
+                        color=vibrant_palette[i % len(vibrant_palette)],
+                        line=dict(width=2, color='rgba(255,255,255,0.2)')
+                    ),
+                    text=row.percent,
+                    textposition="middle center",
+                    textfont=dict(family="CircularStd", size=16, color="black"),
+                    # FIX: Use %{fullData.name} to ensure the timeframe name shows in hover
+                    hovertemplate="<b>%{fullData.name}</b><br>Time: %{customdata[1]} min<extra></extra>"
+                ))
+
+            # 3. Layout
+            fig.update_layout(
+                title={
+                    'text': "<b>Listening Distribution (%)</b>",
+                    'y':0.95,
+                    'x':0.5,
+                    'xanchor': 'center',
+                    'yanchor': 'top',
+                    'font': dict(family="CircularStd", size=22, color="white")
+                },
+                showlegend=True,
+                legend=dict(
+                    font=dict(family="CircularStd", color="white", size=12),
+                    orientation="h",
+                    yanchor="bottom", y=-0.2,
+                    xanchor="center", x=0.5
+                ),
+                paper_bgcolor='rgba(0,0,0,0)',
+                plot_bgcolor='rgba(0,0,0,0)',
+                xaxis=dict(visible=False, range=[-2.2, 2.2], fixedrange=True),
+                yaxis=dict(visible=False, range=[-2.2, 2.2], fixedrange=True),
+                margin=dict(t=80, b=100, l=10, r=10),
+                height=600,
+                hoverlabel=dict(bgcolor="#212121", font_size=14, font_family="CircularStd")
+            )
+
+            st.plotly_chart(fig, use_container_width=True, theme=None, key="bubble_percent_final")
 
                  
                  
