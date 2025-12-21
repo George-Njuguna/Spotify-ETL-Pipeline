@@ -649,7 +649,7 @@ with T2:
             bubble_data['percent'] = (bubble_data['Total Minutes'] / total_all_minutes * 100).round(1).astype(str) + '%'
 
             # Sizing 
-            max_bubble_size = 200  
+            max_bubble_size = 200 
             min_bubble_size = 50  
             max_mins = bubble_data['Total Minutes'].max()
 
@@ -673,23 +673,24 @@ with T2:
                     marker=dict(
                         size=[row.scaled_size], 
                         sizemode='diameter',
+                        opacity=0.78,
                         color=vibrant_palette[i % len(vibrant_palette)],
                         line=dict(width=2, color='rgba(255,255,255,0.2)')
                     ),
                     text=row.percent,
                     textposition="middle center",
-                    textfont=dict(family="CircularStd", size=16, color="black"),
+                    textfont=dict(family="CircularStd", size=16, color="white"),
                     hovertemplate="<b>%{fullData.name}</b><br>Time: %{customdata[1]} min<extra></extra>"
                 ))
 
             fig.update_layout(
                 title={
-                    'text': "<b>Listening Distribution (%)</b>",
+                    'text': "<b>Listening by Time of Day</b>",
                     'y':0.95,
-                    'x':0.5,
+                    'x':0.1,
                     'xanchor': 'center',
                     'yanchor': 'top',
-                    'font': dict(family="CircularStd", size=20, color="white")
+                    'font': dict(family="CircularStd", size=16, color="white")
                 },
                 showlegend=True,
                 legend=dict(
@@ -700,8 +701,8 @@ with T2:
                 ),
                 paper_bgcolor='rgba(0,0,0,0)',
                 plot_bgcolor='rgba(0,0,0,0)',
-                xaxis=dict(visible=False, range=[-2.2, 2.2], fixedrange=True),
-                yaxis=dict(visible=False, range=[-2.2, 2.2], fixedrange=True),
+                xaxis=dict(visible=False, range=[-2.6, 2.6], fixedrange=True),
+                yaxis=dict(visible=False, range=[-2.6, 2.6], fixedrange=True),
                 margin=dict(t=80, b=100, l=10, r=10),
                 height=600,
                 hoverlabel=dict(bgcolor="#212121", font_size=14, font_family="CircularStd")
