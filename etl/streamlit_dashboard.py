@@ -592,12 +592,13 @@ with T2:
 
     with T2_col3:
         with st.container(border=True):
-            if start_dt is  None and end_dt is None:
+            if start_dt is None and end_dt is None:
                 filter = ((recently_played_df['played_at_date'] >= min_date) & (recently_played_df['played_at_date'] <= max_date))
                 data = recently_played_df[filter]
+                print(data)
 
             elif start_dt is not None and end_dt is None:
-                filter = recently_played_df['played_at_date'] >= start_dt
+                filter = recently_played_df['played_at_date'] == start_dt
                 data = recently_played_df[filter]
 
             else:
@@ -619,19 +620,19 @@ with T2:
                 "Night": [0.9, -0.6]
             }
 
-            # Map positions to your data
+            # Mapping positions 
             bubble_data['x'] = bubble_data['Timeframe'].map(lambda x: positions.get(x, [np.random.uniform(-1,1), np.random.uniform(-1,1)])[0])
             bubble_data['y'] = bubble_data['Timeframe'].map(lambda x: positions.get(x, [0, 0])[1])
             total_all_minutes = bubble_data['Total Minutes'].sum()
             bubble_data['percent'] = (bubble_data['Total Minutes'] / total_all_minutes * 100).round(1).astype(str) + '%'
 
-            # 1. Calculate percentage for display
+            # Percentage 
             total_all_minutes = bubble_data['Total Minutes'].sum()
             bubble_data['percent'] = (bubble_data['Total Minutes'] / total_all_minutes * 100).round(1).astype(str) + '%'
 
-            # 2. Sizing logic
-            max_bubble_size = 180  
-            min_bubble_size = 50   
+            # Sizing 
+            max_bubble_size = 200  
+            min_bubble_size = 50  
             max_mins = bubble_data['Total Minutes'].max()
 
             bubble_data['scaled_size'] = bubble_data['Total Minutes'].apply(
@@ -643,14 +644,13 @@ with T2:
             vibrant_palette = ["#1DB954", "#00E5FF", "#7000FF", "#FF007A", "#FFD700", "#94D2BD", "#E9D8A6"]
 
             for i, row in enumerate(bubble_data.itertuples()):
-                # Robust data access
                 total_mins = int(getattr(row, 'Total_Minutes', row[2]))
                 
                 fig.add_trace(go.Scatter(
                     x=[row.x],
                     y=[row.y],
                     mode="markers+text", 
-                    name=str(row.Timeframe), # This is what %{fullData.name} will read
+                    name=str(row.Timeframe),
                     customdata=[[row.percent, total_mins]], 
                     marker=dict(
                         size=[row.scaled_size], 
@@ -661,11 +661,9 @@ with T2:
                     text=row.percent,
                     textposition="middle center",
                     textfont=dict(family="CircularStd", size=16, color="black"),
-                    # FIX: Use %{fullData.name} to ensure the timeframe name shows in hover
                     hovertemplate="<b>%{fullData.name}</b><br>Time: %{customdata[1]} min<extra></extra>"
                 ))
 
-            # 3. Layout
             fig.update_layout(
                 title={
                     'text': "<b>Listening Distribution (%)</b>",
@@ -691,7 +689,7 @@ with T2:
                 hoverlabel=dict(bgcolor="#212121", font_size=14, font_family="CircularStd")
             )
 
-            st.plotly_chart(fig, use_container_width=True, theme=None, key="bubble_percent_final")
+            st.plotly_chart(fig, use_container_width=True, theme=None, key="Bubble Chart")
 
                  
                  
