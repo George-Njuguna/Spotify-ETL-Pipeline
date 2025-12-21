@@ -605,7 +605,7 @@ with T2:
 
 
     # --------- Columns -----------
-    T2_col3, T2_col4 = st.columns([1, 1])
+    T2_col3, T2_col4, T2_col5 = st.columns([1, 0.5, 0.5])
 
     with T2_col3:
         with st.container(border=True):
