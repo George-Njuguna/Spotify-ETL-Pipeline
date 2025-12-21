@@ -343,7 +343,7 @@ with T1:
                 st.write("### Recently Played Tracks")
                 st.dataframe(
                     table_data, 
-                    use_container_width=True,
+                    width = "stretch",
                     hide_index=True 
                 )
 
@@ -359,13 +359,35 @@ day_dict = {
  # -------------- LISTENING STATS ------------------
 with T2:
     with st.expander("⚙ Filters"):
-            col_f1, col_f2 = st.columns(2)
-            with col_f1:
-                start_dt = st.date_input("From", value= None, min_value = min_date , max_value = max_date)
-            with col_f2:
-                end_dt = st.date_input("To", value= None , min_value = start_dt , max_value = max_date)
-        
-    if start_dt is not  None and end_dt is None: # only the start date
+        enable_date_filter = st.checkbox("Filter by date", value=False)
+
+    col_f1, col_f2 = st.columns(2)
+    with col_f1:
+        start_dt = st.date_input(
+            "From",
+            min_value=min_date,
+            max_value=max_date,
+            disabled=not enable_date_filter
+        )
+
+    with col_f2:
+        end_dt = st.date_input(
+            "To",
+            min_value=start_dt,
+            max_value=max_date,
+            disabled=not enable_date_filter
+        )
+
+    if not enable_date_filter : # all Data
+        filter = ((recently_played_df['played_at_date'] >= min_date) & (recently_played_df['played_at_date'] <= max_date))
+        data = recently_played_df
+        start_dt = data['played_at_date'].min()
+        day_diff = (data['played_at_date'].max() - data['played_at_date'].min()).days
+        prev_date = start_dt - pd.Timedelta(days=day_diff)
+        sec_filter = ((recently_played_df['played_at_date'] >= prev_date) & (recently_played_df['played_at_date'] < start_dt))
+        sec_data = recently_played_df[sec_filter]    
+    
+    elif enable_date_filter and start_dt and not end_dt: # only the start date
         filter = recently_played_df['played_at_date'] == start_dt 
         data = recently_played_df[filter]
         day_diff = 1
@@ -374,7 +396,7 @@ with T2:
         sec_filter = ((recently_played_df['played_at_date'] >= prev_date) & (recently_played_df['played_at_date'] < start_dt))
         sec_data = recently_played_df[sec_filter]
 
-    elif start_dt is not None and end_dt is not None:
+    else:
         filter = ((recently_played_df['played_at_date'] >= start_dt) & (recently_played_df['played_at_date'] <= end_dt))
         data = recently_played_df[filter]
         day_diff = (end_dt - start_dt).days
@@ -383,14 +405,7 @@ with T2:
         sec_filter = ((recently_played_df['played_at_date'] >= prev_date) & (recently_played_df['played_at_date'] < start_dt))
         sec_data = recently_played_df[sec_filter]
     
-    else:
-        filter = ((recently_played_df['played_at_date'] >= min_date) & (recently_played_df['played_at_date'] <= max_date))
-        data = recently_played_df
-        start_dt = data['played_at_date'].min()
-        day_diff = (data['played_at_date'].max() - data['played_at_date'].min()).days
-        prev_date = start_dt - pd.Timedelta(days=day_diff)
-        sec_filter = ((recently_played_df['played_at_date'] >= prev_date) & (recently_played_df['played_at_date'] < start_dt))
-        sec_data = recently_played_df[sec_filter]
+    
         
 
 
@@ -522,7 +537,7 @@ with T2:
     # ----------- barh plot ------------
     with T2_col2:
         with st.container(border=True):
-            if start_dt is  None and end_dt is None:
+            if not enable_date_filter :
                 filter = ((recently_played_df['played_at_date'] >= min_date) & (recently_played_df['played_at_date'] <= max_date))
                 data = recently_played_df[filter]
 
@@ -593,17 +608,18 @@ with T2:
     with T2_col3:
         with st.container(border=True):
 
-            if start_dt is not None and end_dt is None:
+            if not enable_date_filter :
+                filter = ((recently_played_df['played_at_date'] >= min_date) & (recently_played_df['played_at_date'] <= max_date))
+                data = recently_played_df.copy()
+
+            elif enable_date_filter and start_dt and not end_dt:
                 filter = recently_played_df['played_at_date'] == start_dt
                 data = recently_played_df[filter]
 
-            elif start_dt is not None and end_dt is not None:
+            else :
                 filter = ((recently_played_df['played_at_date'] >= start_dt) & (recently_played_df['played_at_date'] <= end_dt))
                 data = recently_played_df[filter]
-
-            else :
-                filter = ((recently_played_df['played_at_date'] >= min_date) & (recently_played_df['played_at_date'] <= max_date))
-                data = recently_played_df[filter]
+              
 
             # --------- Buble Chart ---------
             bubble_data = data.groupby('time_frames')['duration_minutes'].sum().reset_index()
@@ -671,7 +687,7 @@ with T2:
                     'x':0.5,
                     'xanchor': 'center',
                     'yanchor': 'top',
-                    'font': dict(family="CircularStd", size=22, color="white")
+                    'font': dict(family="CircularStd", size=20, color="white")
                 },
                 showlegend=True,
                 legend=dict(
