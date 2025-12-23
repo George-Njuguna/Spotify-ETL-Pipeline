@@ -711,26 +711,47 @@ with T2:
             st.plotly_chart(fig, width = "stretch", theme=None, key="Bubble Chart")
 
         with T2_col4:
-            with st.container(border=True):
-                
-                play_counts = recently_played_df['id'].value_counts().reset_index()
-                play_counts.columns = ['id','play_counts']
-                x = play_counts['play_counts'] > 1
-                y = play_counts['play_counts'] == 1    
-
-                # ------- Joining ---------
-                joined_data = pd.merge(recently_played_df, play_counts , how = "left", on = 'id')          
-
+            with st.container(border=True):    
 
                 if not enable_date_filter :
+                    recently_played_df = recently_played_df[recently_played_df['played_at_date'] <= max_date]
+
+                    play_counts = recently_played_df['id'].value_counts().reset_index()
+                    play_counts.columns = ['id','play_counts']
+                    x = play_counts['play_counts'] > 1
+                    y = play_counts['play_counts'] == 1    
+
+                    # ------- Joining ---------
+                    joined_data = pd.merge(recently_played_df, play_counts , how = "left", on = 'id')          
+
                     filter = ((joined_data['played_at_date'] >= min_date) & (joined_data['played_at_date'] <= max_date))
                     data = joined_data.copy()
 
                 elif enable_date_filter and start_dt and not end_dt:
+                    recently_played_df = recently_played_df[recently_played_df['played_at_date'] <= start_dt]
+                    
+                    play_counts = recently_played_df['id'].value_counts().reset_index()
+                    play_counts.columns = ['id','play_counts']
+                    x = play_counts['play_counts'] > 1
+                    y = play_counts['play_counts'] == 1    
+
+                    # ------- Joining ---------
+                    joined_data = pd.merge(recently_played_df, play_counts , how = "left", on = 'id')          
+
                     filter = joined_data['played_at_date'] == start_dt
                     data = joined_data[filter]
 
                 else :
+                    recently_played_df = recently_played_df[recently_played_df['played_at_date'] <= end_dt]
+                    
+                    play_counts = recently_played_df['id'].value_counts().reset_index()
+                    play_counts.columns = ['id','play_counts']
+                    x = play_counts['play_counts'] > 1
+                    y = play_counts['play_counts'] == 1    
+
+                    # ------- Joining ---------
+                    joined_data = pd.merge(recently_played_df, play_counts , how = "left", on = 'id')          
+
                     filter = ((joined_data['played_at_date'] >= start_dt) & (joined_data['played_at_date'] <= end_dt))
                     data = joined_data[filter]
 
