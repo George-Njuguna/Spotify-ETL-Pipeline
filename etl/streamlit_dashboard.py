@@ -712,31 +712,40 @@ with T2:
 
         with T2_col4:
             with st.container(border=True):
+                
+                play_counts = recently_played_df['id'].value_counts().reset_index()
+                play_counts.columns = ['id','play_counts']
+                x = play_counts['play_counts'] > 1
+                y = play_counts['play_counts'] == 1    
+
+                # ------- Joining ---------
+                joined_data = pd.merge(recently_played_df, play_counts , how = "left", on = 'id')          
+
 
                 if not enable_date_filter :
-                    filter = ((recently_played_df['played_at_date'] >= min_date) & (recently_played_df['played_at_date'] <= max_date))
-                    data = recently_played_df.copy()
+                    filter = ((joined_data['played_at_date'] >= min_date) & (joined_data['played_at_date'] <= max_date))
+                    data = joined_data.copy()
 
                 elif enable_date_filter and start_dt and not end_dt:
-                    filter = recently_played_df['played_at_date'] == start_dt
-                    data = recently_played_df[filter]
+                    filter = joined_data['played_at_date'] == start_dt
+                    data = joined_data[filter]
 
                 else :
-                    filter = ((recently_played_df['played_at_date'] >= start_dt) & (recently_played_df['played_at_date'] <= end_dt))
-                    data = recently_played_df[filter]
+                    filter = ((joined_data['played_at_date'] >= start_dt) & (joined_data['played_at_date'] <= end_dt))
+                    data = joined_data[filter]
 
                  # ------- getting the song id counts ---------
-                id_counts = data['id'].value_counts().reset_index()
-                id_counts.columns = ['id','counts']
-                x = id_counts['counts'] > 1
-                y = id_counts['counts'] == 1
+
+                fil1 = data['play_counts'] > 1
+                fil2 = data['play_counts'] == 1    
+
 
                 pie_data = pd.DataFrame({
                     "song_type": ["Replayed Tracks", "New Tracks"],
-                    "count": [id_counts[x]['counts'].sum(), id_counts[y]['counts'].sum()]
+                    "count": [(data[fil1].shape)[0], (data[fil2].shape)[0]]
                 })
 
-                total_counts = id_counts['counts'].sum()
+               
 
                  # ---------- pie --------
                 fig = px.pie(
@@ -759,11 +768,23 @@ with T2:
                 ) 
 
                 fig.update_layout(
+                    title="New Vs Replayed Tracks",
+                    font=dict(family="CircularStd"),
                     paper_bgcolor='rgba(0,0,0,0)',
                     plot_bgcolor='rgba(0,0,0,0)',
-                    hovermode="x unified"
-                )         
+                    showlegend=True,
+                    legend=dict(
+                        orientation="h",     
+                        yanchor="bottom",
+                        y=-0.2,              
+                        xanchor="center",
+                        x=0.5               
+                    ),
+                    margin=dict(t=80, b=20, l=20, r=20) 
+                )
 
+                pull_values = [0.2 if name == "New Tracks" else 0 for name in pie_data["song_type"]]
+                
                 fig.update_traces(
                     textinfo='percent+label', 
                     hovertemplate="<b>%{label}</b><br>Count: %{value}<br>Percentage: %{percent}<extra></extra>"
@@ -774,7 +795,7 @@ with T2:
                     yaxis=dict(showspikes=False)   
                 )
 
-                fig.update_traces(textinfo='none', rotation = 160) 
+                fig.update_traces(pull=pull_values,textinfo='none', rotation = 90) 
                 fig.update_layout(title="New Vs Replayed Tracks")
                 fig.update_layout(font=dict(family="CircularStd"))
 
