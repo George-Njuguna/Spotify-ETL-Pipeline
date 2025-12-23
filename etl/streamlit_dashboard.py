@@ -710,7 +710,29 @@ with T2:
 
             st.plotly_chart(fig, width = "stretch", theme=None, key="Bubble Chart")
 
-                 
+        with T2_col4:
+            with st.container(border=True):
+
+                if not enable_date_filter :
+                    filter = ((recently_played_df['played_at_date'] >= min_date) & (recently_played_df['played_at_date'] <= max_date))
+                    data = recently_played_df.copy()
+
+                elif enable_date_filter and start_dt and not end_dt:
+                    filter = recently_played_df['played_at_date'] == start_dt
+                    data = recently_played_df[filter]
+
+                else :
+                    filter = ((recently_played_df['played_at_date'] >= start_dt) & (recently_played_df['played_at_date'] <= end_dt))
+                    data = recently_played_df[filter]
+
+                # ------- getting the song id counts ---------
+                id_counts = pd.DataFrame(data['id'].value_counts().reset_index())
+                id_counts.columns = ['id','counts']
+
+
+
+
+                        
                  
 
 
