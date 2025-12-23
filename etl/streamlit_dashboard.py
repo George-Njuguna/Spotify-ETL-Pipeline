@@ -725,9 +725,60 @@ with T2:
                     filter = ((recently_played_df['played_at_date'] >= start_dt) & (recently_played_df['played_at_date'] <= end_dt))
                     data = recently_played_df[filter]
 
-                # ------- getting the song id counts ---------
-                id_counts = pd.DataFrame(data['id'].value_counts().reset_index())
+                 # ------- getting the song id counts ---------
+                id_counts = data['id'].value_counts().reset_index()
                 id_counts.columns = ['id','counts']
+                x = id_counts['counts'] > 1
+                y = id_counts['counts'] == 1
+
+                pie_data = pd.DataFrame({
+                    "song_type": ["Replayed Tracks", "New Tracks"],
+                    "count": [id_counts[x]['counts'].sum(), id_counts[y]['counts'].sum()]
+                })
+
+                total_counts = id_counts['counts'].sum()
+
+                 # ---------- pie --------
+                fig = px.pie(
+                    pie_data,
+                    names="song_type",
+                    values="count",
+                    color_discrete_sequence=spotify_palette,
+                    hole=0.8 
+                )
+
+                fig.add_annotation(
+                    text=f"{songs_played:,} Songs",
+                    x=0.5,            
+                    y=0.5,             
+                    showarrow=False,
+                    font=dict(
+                        size=18,
+                        color="White"
+                    )
+                ) 
+
+                fig.update_layout(
+                    paper_bgcolor='rgba(0,0,0,0)',
+                    plot_bgcolor='rgba(0,0,0,0)',
+                    hovermode="x unified"
+                )         
+
+                fig.update_traces(
+                    textinfo='percent+label', 
+                    hovertemplate="<b>%{label}</b><br>Count: %{value}<br>Percentage: %{percent}<extra></extra>"
+                )
+
+                fig.update_layout(
+                    xaxis=dict(showspikes=False),  
+                    yaxis=dict(showspikes=False)   
+                )
+
+                fig.update_traces(textinfo='none', rotation = 160) 
+                fig.update_layout(title="New Vs Replayed Tracks")
+                fig.update_layout(font=dict(family="CircularStd"))
+
+                st.plotly_chart(fig, width="stretch", theme="streamlit", key = "pie chart 2" )
 
 
 
