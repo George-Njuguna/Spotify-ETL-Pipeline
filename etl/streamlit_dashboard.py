@@ -828,7 +828,7 @@ with T2:
                     recently_played_df = recently_played_df[recently_played_df['played_at_date'] <= max_date]
 
                 elif enable_date_filter and start_dt and not end_dt:
-                    recently_played_df = recently_played_df[recently_played_df['played_at_date'] <= start_dt]
+                    recently_played_df = recently_played_df[recently_played_df['played_at_date'] == start_dt]
 
                 else :
                     recently_played_df = recently_played_df[(recently_played_df['played_at_date'] >= start_dt) & (recently_played_df['played_at_date'] <= end_dt)]
