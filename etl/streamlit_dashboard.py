@@ -601,7 +601,7 @@ with T2:
                 xaxis=dict(showspikes=False),  
                 yaxis=dict(showspikes=False)   
             )
-            st.plotly_chart(fig, width = "stretch", theme=None, key="genre_barh_plot")
+            st.plotly_chart(fig, width = "stretch", theme=None, key="weekly_listening_barh_plot")
 
 
     # --------- Columns -----------
@@ -835,10 +835,10 @@ with T2:
 
                  # --------- Joining  ----------
                 
-                playlist_data = pd.merge(recently_played_df, playlist_songs_df , how = "inner", on = ['id', 'track_id']) 
-                albums_data = pd.merge(recently_played_df, saved_albums_df , how = "inner", on = ['album_id', 'id']) 
-                saved_data = pd.merge(recently_played_df, saved_tracks_df , how = "inner", on = ['album_id', 'album_id']) 
-                artist_data = pd.merge(recently_played_df, followed_artists_df , how = "inner", on = ['artist_id', 'id']) 
+                playlist_data = pd.merge(recently_played_df, playlist_songs_df, left_on = "id" ,right_on = "track_id", how = "inner") 
+                albums_data = pd.merge(recently_played_df, saved_albums_df , left_on = "album_id" ,right_on = "id", how = "inner") 
+                saved_data = pd.merge(recently_played_df, saved_tracks_df ,left_on = "album_id" ,right_on = "album_id", how = "inner") 
+                artist_data = pd.merge(recently_played_df, followed_artists_df ,left_on = "artist_id" ,right_on = "id", how = "inner") 
 
                 bar_data = pd.DataFrame({
                     "song_type": ["Playlists", "Albums", "Saved Songs" , "Followed Artists"],
@@ -846,7 +846,41 @@ with T2:
                 })
 
                 # ----------- Plotting bar Graph ------------
-                
+                max_val = bar_data['count'].max()
+                colors = ['#EC5800' if val == max_val else '#1DB954' for val in bar_data['count']]
 
+                fig = px.bar(
+                    bar_data,
+                    x="song_type",
+                    y="count",
+                    title="Source Of Listening Tracks"
+                )
+
+                fig.update_traces(
+                    marker_color=colors,  
+                    marker_line_width=0      
+                )
+            
+                fig.update_xaxes(showgrid=False)
+                fig.update_yaxes(showgrid=False, showticklabels=False)
+                fig.update_layout(
+                    font=dict(family="CircularStd"),
+                    xaxis_title=None,
+                    yaxis_title=None,
+                    bargap=0.2  
+                )
+
+                fig.update_layout(
+                    paper_bgcolor='rgba(0,0,0,0)',
+                    plot_bgcolor='rgba(0,0,0,0)',
+                    hovermode="x unified"
+                )
+
+                fig.update_layout( 
+                    xaxis=dict(showspikes=False),  
+                    yaxis=dict(showspikes=False)   
+                )
+
+                st.plotly_chart(fig, width = "stretch", theme="streamlit", key="sorce of listening tracks Bar")
 
 
