@@ -822,18 +822,31 @@ with T2:
 
                 st.plotly_chart(fig, width="stretch", theme="streamlit", key = "pie chart 2" )
 
+        with T2_col5:
+            with st.container(border=True):
+                if not enable_date_filter : # all data 
+                    recently_played_df = recently_played_df[recently_played_df['played_at_date'] <= max_date]
+
+                elif enable_date_filter and start_dt and not end_dt:
+                    recently_played_df = recently_played_df[recently_played_df['played_at_date'] <= start_dt]
+
+                else :
+                    recently_played_df = recently_played_df[(recently_played_df['played_at_date'] >= start_dt) & (recently_played_df['played_at_date'] <= end_dt)]
+
+                 # --------- Joining  ----------
+                
+                playlist_data = pd.merge(recently_played_df, playlist_songs_df , how = "inner", on = ['id', 'track_id']) 
+                albums_data = pd.merge(recently_played_df, saved_albums_df , how = "inner", on = ['album_id', 'id']) 
+                saved_data = pd.merge(recently_played_df, saved_tracks_df , how = "inner", on = ['album_id', 'album_id']) 
+                artist_data = pd.merge(recently_played_df, followed_artists_df , how = "inner", on = ['artist_id', 'id']) 
+
+                bar_data = pd.DataFrame({
+                    "song_type": ["Playlists", "Albums", "Saved Songs" , "Followed Artists"],
+                    "count": [(playlist_data.shape)[0], (albums_data.shape)[0], (saved_data.shape)[0], (artist_data.shape)[0]] 
+                })
+
+                # ----------- Plotting bar Graph ------------
+                
 
 
 
-                        
-                 
-
-
-
-
-
-                 
-                 
-         
-        
-        
