@@ -918,12 +918,18 @@ with T3:
     # -------- Data---------
     playlist_tracks = playlists_df["tracks"].sum()
 
+    # -------- Most_listened_playlist------
+    join_1 = pd.merge(recently_played_df, playlist_songs_df, left_on = "id" ,right_on = "track_id", how = "inner") 
+    join_2 = pd.merge(join_1, playlists_df, left_on = "playlist_id" ,right_on = "id", how = "left") 
+    most_listened_playlists = join_2["name_y"].value_counts().reset_index()
+    most_listened_playlists.columns = ['name','play_counts']
+    
 
     # ------------ KPIS ---------------
     k1, k2, k3, k4, k5 = st.columns([1,1,1,1,1], border=True)
     k1.metric("Total Playlists", f"{(playlists_df.shape)[0]}")
     k2.metric("Total Playlist Tracks", f"{playlists_df["tracks"].sum()}")
     k3.metric("Owned Playlists", f"{(playlists_df[my_id_filter].shape)[0]}")
-    k4.metric("Most Listened Playlist", f"{(followed_artists_df.shape)[0]}")
+    k4.metric("Most Listened Playlist", f"{most_listened_playlists.iloc[0,0]}")
     k5.metric("Public Playlists", f"{(playlists_df[public_playlist_filter].shape)[0]}")
 
