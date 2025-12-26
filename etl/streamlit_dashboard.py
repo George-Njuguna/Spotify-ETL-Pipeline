@@ -61,7 +61,8 @@ st.markdown("""
     h1, h2, h3, p {
         color: white !important;
     }
-
+    
+            
     /* =====================
     Text Hover Color
     ===================== */
@@ -925,14 +926,18 @@ with T3:
     most_listened_playlists.columns = ['name','play_counts']
 
     #------- metrices calc-------
-    perc_of_overall_listn = (most_listened_playlists['play_counts'].max() /  (recently_played_df.shape)[0])*100
-    
+    perc_of_overall_listn = (most_listened_playlists['play_counts'].max() /  most_listened_playlists['play_counts'].sum())*100
+    perc_of_total_playlist = (((playlists_df[my_id_filter].shape)[0] / (playlists_df.shape)[0])*100)
+    perc_of_total_public = ((playlists_df[public_playlist_filter].shape)[0] / (playlists_df.shape)[0])*100
 
     # ------------ KPIS ---------------
     k1, k2, k3, k4, k5 = st.columns([1,1,1,1,1], border=True)
+    
+    st.markdown('<div class="no-arrow">', unsafe_allow_html=True)
     k1.metric("Total Playlists", f"{(playlists_df.shape)[0]}")
     k2.metric("Total Playlist Tracks", f"{playlists_df["tracks"].sum()}")
-    k3.metric("Owned Playlists", f"{(playlists_df[my_id_filter].shape)[0]}")
+    k3.metric("Owned Playlists", f"{(playlists_df[my_id_filter].shape)[0]}", f"{perc_of_total_playlist:.2f}% Of Total Playlists")
     k4.metric("Most Listened Playlist", f"{most_listened_playlists.iloc[0,0]}", f"{perc_of_overall_listn:.2f}% Of Overall Listening")
-    k5.metric("Public Playlists", f"{(playlists_df[public_playlist_filter].shape)[0]}")
+    k5.metric("Public Playlists", f"{(playlists_df[public_playlist_filter].shape)[0]}", f"{perc_of_total_public:.2f}% Of Total Playlists")
+    
 
