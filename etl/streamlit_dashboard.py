@@ -884,6 +884,46 @@ with T2:
                 st.plotly_chart(fig, width = "stretch", theme="streamlit", key="sorce of listening tracks Bar")
 
  # ----------- Playlists ---------------
+with T3:
+    with st.expander("⚙ Filters"):
+        enable_date_filter = st.checkbox("Filter by date", value=False , key = "playlist_filter")
+
+        col_f1_1, col_f2_2 = st.columns(2)
+        with col_f1_1:
+            start_dt = st.date_input(
+                "From",
+                value=min_date, 
+                min_value=min_date,
+                max_value=max_date,
+                disabled=not enable_date_filter,
+                key = "playlist_date_filter1"
+            )
+
+        with col_f2_2:
+            end_dt = st.date_input(
+                "To",
+                value=None, 
+                min_value=start_dt,
+                max_value=max_date,
+                disabled=not enable_date_filter,
+                key = "playlist_date_filter2"
+            )
+    
+    #---- my id------
+    my_id = "43rd4xexolpiac081m1ngw5ue"
+    my_id_filter = playlists_df['owner_id'] == my_id
+
+    public_playlist_filter = playlists_df["public"]==True
+
+    # -------- Data---------
+    playlist_tracks = playlists_df["tracks"].sum()
 
 
+    # ------------ KPIS ---------------
+    k1, k2, k3, k4, k5 = st.columns([1,1,1,1,1], border=True)
+    k1.metric("Total Playlists", f"{(playlists_df.shape)[0]}")
+    k2.metric("Total Playlist Tracks", f"{playlists_df["tracks"].sum()}")
+    k3.metric("Owned Playlists", f"{(playlists_df[my_id_filter].shape)[0]}")
+    k4.metric("Most Listened Playlist", f"{(followed_artists_df.shape)[0]}")
+    k5.metric("Public Playlists", f"{(playlists_df[public_playlist_filter].shape)[0]}")
 
