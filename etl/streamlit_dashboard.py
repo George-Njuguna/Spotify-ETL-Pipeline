@@ -923,6 +923,9 @@ with T3:
     join_2 = pd.merge(join_1, playlists_df, left_on = "playlist_id" ,right_on = "id", how = "left") 
     most_listened_playlists = join_2["name_y"].value_counts().reset_index()
     most_listened_playlists.columns = ['name','play_counts']
+
+    #------- metrices calc-------
+    perc_of_overall_listn = (most_listened_playlists['play_counts'].max() /  (recently_played_df.shape)[0])*100
     
 
     # ------------ KPIS ---------------
@@ -930,6 +933,6 @@ with T3:
     k1.metric("Total Playlists", f"{(playlists_df.shape)[0]}")
     k2.metric("Total Playlist Tracks", f"{playlists_df["tracks"].sum()}")
     k3.metric("Owned Playlists", f"{(playlists_df[my_id_filter].shape)[0]}")
-    k4.metric("Most Listened Playlist", f"{most_listened_playlists.iloc[0,0]}")
+    k4.metric("Most Listened Playlist", f"{most_listened_playlists.iloc[0,0]}", f"{perc_of_overall_listn:.2f}% Of Overall Listening")
     k5.metric("Public Playlists", f"{(playlists_df[public_playlist_filter].shape)[0]}")
 
