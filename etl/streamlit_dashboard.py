@@ -939,6 +939,85 @@ with T3:
     k3.metric("Owned Playlists", f"{(playlists_df[my_id_filter].shape)[0]}", f"{perc_of_total_playlist:.2f}% Of Total Playlists")
     k4.metric("Most Listened Playlist", f"{most_listened_playlists.iloc[0,0]}", f"{perc_of_overall_listn:.2f}% Of Overall Listening")
     k5.metric("Public Playlists", f"{(playlists_df[public_playlist_filter].shape)[0]}", f"{perc_of_total_public:.2f}% Of Total Playlists")
+
+    # ------------ Plots----------------
+    T3_col1 = st.columns(1)[0]
+
+    # ---------- Top 4 Playlists filters ---------
+    top_4_names = most_listened_playlists.iloc[0:4, 0].tolist()
+
+    join_2['Playlist Group'] = join_2['name_y'].apply(
+        lambda x: x if x in top_4_names else 'Others'
+    )
+
+    multi_line_data = (
+        join_2.groupby('Playlist Group')
+        .resample("W", on="played_at")["duration_minutes"]
+        .sum()
+        .rolling(3)
+        .mean()
+        .reset_index()
+    )
+
+    multi_line_data = multi_line_data.rename(
+        columns={"duration_minutes": "Minutes Played", "played_at": "Day"}
+    )
+
+    with T3_col1:
+            with st.container(border=True):
+                fig = px.line(
+                    multi_line_data,
+                    x="Day",
+                    y="Minutes Played",
+                    color="Playlist Group",
+                    line_shape="spline",
+                    title="Listening Trends: Top 4 Playlists vs Others",
+                    color_discrete_sequence=["#1DB954", "#EE9B00", '#7000FF', "#0A9396", "#AE2012"]
+                )
+
+                #  Only show the minute value
+                fig.update_traces(
+                    mode="lines", 
+                    line=dict(width=3),
+                    hovertemplate="<b>Minutes:</b> %{y:.0f}<extra></extra>"
+                )
+
+                fig.update_layout(
+                    hovermode="closest",
+                    showlegend=True,
+                    paper_bgcolor='rgba(0,0,0,0)',
+                    plot_bgcolor='rgba(0,0,0,0)',
+                    font=dict(family="CircularStd"),
+                    
+                    xaxis=dict(
+                        showgrid=False, 
+                        title=None, 
+                        showspikes=False, 
+                        fixedrange=True
+                    ),
+                    yaxis=dict(
+                        showgrid=False, 
+                        title=None, 
+                        showticklabels=False, 
+                        showspikes=False, 
+                        fixedrange=True
+                    ),
+                    legend=dict(
+                        orientation="h",
+                        yanchor="bottom", y=-0.3,
+                        xanchor="center", x=0.5,
+                        title=None
+                    ),
+                    margin=dict(l=20, r=20, t=50, b=80)
+                )
+
+                st.plotly_chart(
+                    fig, 
+                    width='stretch', 
+                    theme=None, 
+                    config={'displayModeBar': False}, 
+                    key="multi_linegraph"
+                )
     
 
     
