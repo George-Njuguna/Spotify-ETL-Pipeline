@@ -926,7 +926,7 @@ with T3:
     most_listened_playlists.columns = ['name','play_counts']
 
     #------- metrices calc-------
-    perc_of_overall_listn = (most_listened_playlists['play_counts'].max() /  most_listened_playlists['play_counts'].sum())*100
+    perc_of_overall_listn = (most_listened_playlists['play_counts'].max() /  (recently_played_df.shape)[0])*100
     perc_of_total_playlist = (((playlists_df[my_id_filter].shape)[0] / (playlists_df.shape)[0])*100)
     perc_of_total_public = ((playlists_df[public_playlist_filter].shape)[0] / (playlists_df.shape)[0])*100
 
@@ -941,3 +941,4 @@ with T3:
     k5.metric("Public Playlists", f"{(playlists_df[public_playlist_filter].shape)[0]}", f"{perc_of_total_public:.2f}% Of Total Playlists")
     
 
+    
