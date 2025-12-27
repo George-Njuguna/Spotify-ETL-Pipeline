@@ -715,43 +715,43 @@ with T2:
             with st.container(border=True):    
 
                 if not enable_date_filter :
-                    recently_played_df = recently_played_df[recently_played_df['played_at_date'] <= max_date]
+                    dt1 = recently_played_df[recently_played_df['played_at_date'] <= max_date]
 
-                    play_counts = recently_played_df['id'].value_counts().reset_index()
+                    play_counts = dt1['id'].value_counts().reset_index()
                     play_counts.columns = ['id','play_counts']
                     x = play_counts['play_counts'] > 1
                     y = play_counts['play_counts'] == 1    
 
                     # ------- Joining ---------
-                    joined_data = pd.merge(recently_played_df, play_counts , how = "left", on = 'id')          
+                    joined_data = pd.merge(dt1, play_counts , how = "left", on = 'id')          
 
                     filter = ((joined_data['played_at_date'] >= min_date) & (joined_data['played_at_date'] <= max_date))
                     data = joined_data.copy()
 
                 elif enable_date_filter and start_dt and not end_dt:
-                    recently_played_df = recently_played_df[recently_played_df['played_at_date'] <= start_dt]
+                    dt1 = recently_played_df[recently_played_df['played_at_date'] <= start_dt]
                     
-                    play_counts = recently_played_df['id'].value_counts().reset_index()
+                    play_counts = dt1['id'].value_counts().reset_index()
                     play_counts.columns = ['id','play_counts']
                     x = play_counts['play_counts'] > 1
                     y = play_counts['play_counts'] == 1    
 
                     # ------- Joining ---------
-                    joined_data = pd.merge(recently_played_df, play_counts , how = "left", on = 'id')          
+                    joined_data = pd.merge(dt1, play_counts , how = "left", on = 'id')          
 
                     filter = joined_data['played_at_date'] == start_dt
                     data = joined_data[filter]
 
                 else :
-                    recently_played_df = recently_played_df[recently_played_df['played_at_date'] <= end_dt]
+                    dt1 = recently_played_df[recently_played_df['played_at_date'] <= end_dt]
                     
-                    play_counts = recently_played_df['id'].value_counts().reset_index()
+                    play_counts = dt1['id'].value_counts().reset_index()
                     play_counts.columns = ['id','play_counts']
                     x = play_counts['play_counts'] > 1
                     y = play_counts['play_counts'] == 1    
 
                     # ------- Joining ---------
-                    joined_data = pd.merge(recently_played_df, play_counts , how = "left", on = 'id')          
+                    joined_data = pd.merge(dt1, play_counts , how = "left", on = 'id')          
 
                     filter = ((joined_data['played_at_date'] >= start_dt) & (joined_data['played_at_date'] <= end_dt))
                     data = joined_data[filter]
@@ -826,20 +826,20 @@ with T2:
         with T2_col5:
             with st.container(border=True):
                 if not enable_date_filter : # all data 
-                    recently_played_df = recently_played_df[recently_played_df['played_at_date'] <= max_date]
+                    dt2 = recently_played_df[recently_played_df['played_at_date'] <= max_date]
 
                 elif enable_date_filter and start_dt and not end_dt:
-                    recently_played_df = recently_played_df[recently_played_df['played_at_date'] == start_dt]
+                    dt2 = recently_played_df[recently_played_df['played_at_date'] == start_dt]
 
                 else :
-                    recently_played_df = recently_played_df[(recently_played_df['played_at_date'] >= start_dt) & (recently_played_df['played_at_date'] <= end_dt)]
+                    dt2 = recently_played_df[(recently_played_df['played_at_date'] >= start_dt) & (recently_played_df['played_at_date'] <= end_dt)]
 
                  # --------- Joining  ----------
                 
-                playlist_data = pd.merge(recently_played_df, playlist_songs_df, left_on = "id" ,right_on = "track_id", how = "inner") 
-                albums_data = pd.merge(recently_played_df, saved_albums_df , left_on = "album_id" ,right_on = "id", how = "inner") 
-                saved_data = pd.merge(recently_played_df, saved_tracks_df ,left_on = "album_id" ,right_on = "album_id", how = "inner") 
-                artist_data = pd.merge(recently_played_df, followed_artists_df ,left_on = "artist_id" ,right_on = "id", how = "inner") 
+                playlist_data = pd.merge(dt2, playlist_songs_df, left_on = "id" ,right_on = "track_id", how = "inner") 
+                albums_data = pd.merge(dt2, saved_albums_df , left_on = "album_id" ,right_on = "id", how = "inner") 
+                saved_data = pd.merge(dt2, saved_tracks_df ,left_on = "album_id" ,right_on = "album_id", how = "inner") 
+                artist_data = pd.merge(dt2, followed_artists_df ,left_on = "artist_id" ,right_on = "id", how = "inner") 
 
                 bar_data = pd.DataFrame({
                     "song_type": ["Playlists", "Albums", "Saved Songs" , "Followed Artists"],
@@ -886,38 +886,11 @@ with T2:
 
  # ----------- Playlists ---------------
 with T3:
-    with st.expander("⚙ Filters"):
-        enable_date_filter = st.checkbox("Filter by date", value=False , key = "playlist_filter")
-
-        col_f1_1, col_f2_2 = st.columns(2)
-        with col_f1_1:
-            start_dt = st.date_input(
-                "From",
-                value=min_date, 
-                min_value=min_date,
-                max_value=max_date,
-                disabled=not enable_date_filter,
-                key = "playlist_date_filter1"
-            )
-
-        with col_f2_2:
-            end_dt = st.date_input(
-                "To",
-                value=None, 
-                min_value=start_dt,
-                max_value=max_date,
-                disabled=not enable_date_filter,
-                key = "playlist_date_filter2"
-            )
-    
     #---- my id------
     my_id = "43rd4xexolpiac081m1ngw5ue"
     my_id_filter = playlists_df['owner_id'] == my_id
 
     public_playlist_filter = playlists_df["public"]==True
-
-    # -------- Data---------
-    playlist_tracks = playlists_df["tracks"].sum()
 
     # -------- Most_listened_playlist------
     join_1 = pd.merge(recently_played_df, playlist_songs_df, left_on = "id" ,right_on = "track_id", how = "inner") 
@@ -932,8 +905,6 @@ with T3:
 
     # ------------ KPIS ---------------
     k1, k2, k3, k4, k5 = st.columns([1,1,1,1,1], border=True)
-    
-    st.markdown('<div class="no-arrow">', unsafe_allow_html=True)
     k1.metric("Total Playlists", f"{(playlists_df.shape)[0]}")
     k2.metric("Total Playlist Tracks", f"{playlists_df["tracks"].sum()}")
     k3.metric("Owned Playlists", f"{(playlists_df[my_id_filter].shape)[0]}", f"{perc_of_total_playlist:.2f}% Of Total Playlists")
@@ -965,7 +936,7 @@ with T3:
 
     with T3_col1:
             with st.container(border=True):
-                fig = px.line(
+                fig1 = px.line(
                     multi_line_data,
                     x="Day",
                     y="Minutes Played",
@@ -976,13 +947,13 @@ with T3:
                 )
 
                 #  Only show the minute value
-                fig.update_traces(
+                fig1.update_traces(
                     mode="lines", 
                     line=dict(width=3),
                     hovertemplate="<b>Minutes:</b> %{y:.0f}<extra></extra>"
                 )
 
-                fig.update_layout(
+                fig1.update_layout(
                     hovermode="closest",
                     showlegend=True,
                     paper_bgcolor='rgba(0,0,0,0)',
@@ -1012,7 +983,7 @@ with T3:
                 )
 
                 st.plotly_chart(
-                    fig, 
+                    fig1, 
                     width='stretch', 
                     theme=None, 
                     config={'displayModeBar': False}, 
