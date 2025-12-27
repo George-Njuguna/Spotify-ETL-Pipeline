@@ -923,7 +923,7 @@ with T3:
 
     multi_line_data = (
         join_2.groupby('Playlist Group')
-        .resample("W", on="played_at")["duration_minutes"]
+        .resample("5D", on="played_at")["duration_minutes"]
         .sum()
         .rolling(3)
         .mean()
