@@ -688,7 +688,7 @@ with T2:
                 title={
                     'text': "<b>Listening by Time of Day</b>",
                     'y':0.95,
-                    'x':0.1,
+                    'x':0.5,
                     'xanchor': 'center',
                     'yanchor': 'top',
                     'font': dict(family="CircularStd", size=16, color="white")
@@ -908,7 +908,7 @@ with T3:
     k1.metric("Total Playlists", f"{(playlists_df.shape)[0]}")
     k2.metric("Total Playlist Tracks", f"{playlists_df["tracks"].sum()}")
     k3.metric("Owned Playlists", f"{(playlists_df[my_id_filter].shape)[0]}", f"{perc_of_total_playlist:.2f}% Of Total Playlists")
-    k4.metric("Most Listened Playlist", f"{most_listened_playlists.iloc[0,0]}", f"{perc_of_overall_listn:.2f}% Of Overall Listening")
+    k4.metric("Most Listened Playlist", f"{most_listened_playlists.iloc[0,0]}", f"{perc_of_overall_listn:.2f}% Of Overall Listened Songs")
     k5.metric("Public Playlists", f"{(playlists_df[public_playlist_filter].shape)[0]}", f"{perc_of_total_public:.2f}% Of Total Playlists")
 
     # ------------ Plots----------------
@@ -994,7 +994,7 @@ with T3:
     T3_col2, T3_col3, T3_col4 = st.columns([0.5, 1, 0.8])
 
     # ------------ Filter ------------
-    filter_options = top_4_names + ["Others", "All Playlists"]
+    filter_options = top_4_names + ["Other Playlists", "All Playlists"]
 
     with T3_col2:
         with st.container(border=True):
@@ -1006,20 +1006,27 @@ with T3:
     
     detailed_df = join_2.copy()
     my_playlists = playlists_df[my_id_filter]
+    overall_listening_time = recently_played_df["duration_minutes"].sum() 
 
     if selected_group == "All Playlists":
         final_analysis_df = detailed_df
-        Total_songs = my_playlists["tracks"].sum()
+        total_songs = my_playlists["tracks"].sum()
+        play_rate = (final_analysis_df["duration_minutes"].sum() / overall_listening_time) * 100
         
-    elif selected_group == "Others":
+        
+    elif selected_group == "Other Playlists":
         final_analysis_df = detailed_df[~detailed_df['name_y'].isin(top_4_names)]
         filtered_playlist_df = my_playlists[~my_playlists['name'].isin(top_4_names)]
-        Total_songs = filtered_playlist_df["tracks"].sum()
+        total_songs = filtered_playlist_df["tracks"].sum()
+        percentage_playlist_songs = (total_songs / my_playlists["tracks"].sum()) * 100
+        play_rate = (final_analysis_df["duration_minutes"].sum() / overall_listening_time) * 100
         
     else:
         final_analysis_df = detailed_df[detailed_df['name_y'] == selected_group]
         filtered_playlist_df = my_playlists[my_playlists['name'] == selected_group]
-        Total_songs = filtered_playlist_df["tracks"].sum()
+        total_songs = filtered_playlist_df["tracks"].sum()
+        percentage_playlist_songs = (total_songs / my_playlists["tracks"].sum()) * 100
+        play_rate = (final_analysis_df["duration_minutes"].sum() / overall_listening_time) * 100
 
     with T3_col2:
         with st.container(border=True):
@@ -1038,12 +1045,12 @@ with T3:
 
 
             
-            #--------- Most Listened songs ---------
+            #--------- Total Playlist songs ---------
             st.markdown("### Playlist Stats")
             st.metric(
                 label="Total_songs", 
-                value=f"{Total_songs}", 
-                delta=f"{most_listened_percentage:.2f}% Of Total",
+                value=f"{total_songs}", 
+                delta= "All Playlist Songs" if selected_group == "All Playlists" else f"{percentage_playlist_songs:.2f}% Of All Owned Playlist Songs",
                 delta_color="normal"
             )
             st.markdown("---")
@@ -1052,7 +1059,7 @@ with T3:
             st.metric(
                 label="Most Listened Artist", 
                 value=f"{most_listened_artists_df.iloc[0,0]}", 
-                delta=f"{most_listened_artist_percentage:.2f}% Of Total",
+                delta=f"{most_listened_artist_percentage:.2f}% Of {selected_group} Artists",
                 delta_color="normal"
             )
             st.markdown("---")
@@ -1060,9 +1067,9 @@ with T3:
             # --------Playlist Play rate-------
             st.metric(
                 label="Playlist Play Rate", 
-                value=f"{perc_of_overall_listn:.1f}%", 
-                delta="Overall Listening",
-                delta_color="off" # This keeps the text but removes the color/arrow logic
+                value=f"{play_rate:.1f}%", 
+                delta="Of Overall Listening Time",
+                delta_color="normal" 
             )
 
 
@@ -1165,7 +1172,7 @@ with T3:
             st.metric(
                 label="Most Listened Song", 
                 value=f"{most_listened_songs.iloc[0,0]}", 
-                delta=f"{most_listened_percentage:.2f}% Of Total",
+                delta=f"{most_listened_percentage:.2f}% Of {selected_group} Songs",
                 delta_color="normal"
             )
 
