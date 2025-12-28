@@ -990,5 +990,14 @@ with T3:
                     key="multi_linegraph"
                 )
     
+    # ------------ Filter ------------
+    filter_options = top_4_names + ["Others", "All Playlists"]
+
+    selected_group = st.selectbox(
+        "Select Playlist View for Detailed Analysis",
+        options=filter_options,
+        index=5 
+    )
+    
 
     
