@@ -1072,6 +1072,96 @@ with T3:
             )
             st.plotly_chart(fig, width = "stretch", theme=None, key="playlist_listening_barh_plot")
 
+    with T3_col3:
+        with st.container(border=True):
+            bubble_data = final_analysis_df.groupby('time_frames')['duration_minutes'].sum().reset_index()
+            bubble_data.columns = ['Timeframe', 'Total Minutes']
+            max_val = bubble_data['Total Minutes'].max()
+
+            positions = {
+                "Morning": [0, 0],
+                "Late Morning": [1.0, 0.8],
+                "Midday": [-1.1, 0.5],
+                "Late AfterNoon": [0.2, -1.2],
+                "AfterNoon": [-0.8, -0.8],
+                "Evening": [-0.5, 1.3],
+                "Night": [0.9, -0.6]
+            }
+
+            # Mapping positions 
+            bubble_data['x'] = bubble_data['Timeframe'].map(lambda x: positions.get(x, [np.random.uniform(-1,1), np.random.uniform(-1,1)])[0])
+            bubble_data['y'] = bubble_data['Timeframe'].map(lambda x: positions.get(x, [0, 0])[1])
+            total_all_minutes = bubble_data['Total Minutes'].sum()
+            bubble_data['percent'] = (bubble_data['Total Minutes'] / total_all_minutes * 100).round(1).astype(str) + '%'
+
+            # Percentage 
+            total_all_minutes = bubble_data['Total Minutes'].sum()
+            bubble_data['percent'] = (bubble_data['Total Minutes'] / total_all_minutes * 100).round(1).astype(str) + '%'
+
+            # Sizing 
+            max_bubble_size = 200 
+            min_bubble_size = 50  
+            max_mins = bubble_data['Total Minutes'].max()
+
+            bubble_data['scaled_size'] = bubble_data['Total Minutes'].apply(
+                lambda x: min_bubble_size + (np.sqrt(x) / np.sqrt(max_mins)) * (max_bubble_size - min_bubble_size)
+            )
+
+            fig = go.Figure()
+
+            vibrant_palette = ["#1DB954", "#00E5FF", "#7000FF", "#FF007A", "#FFD700", "#94D2BD", "#E9D8A6"]
+
+            # ------------ Bubble Chart ------------
+            for i, row in enumerate(bubble_data.itertuples()):
+                total_mins = int(getattr(row, 'Total_Minutes', row[2]))
+                
+                fig.add_trace(go.Scatter(
+                    x=[row.x],
+                    y=[row.y],
+                    mode="markers+text", 
+                    name=str(row.Timeframe),
+                    customdata=[[row.percent, total_mins]], 
+                    marker=dict(
+                        size=[row.scaled_size], 
+                        sizemode='diameter',
+                        opacity=0.78,
+                        color=vibrant_palette[i % len(vibrant_palette)],
+                        line=dict(width=2, color='rgba(255,255,255,0.2)')
+                    ),
+                    text=row.percent,
+                    textposition="middle center",
+                    textfont=dict(family="CircularStd", size=16, color="white"),
+                    hovertemplate="<b>%{fullData.name}</b><br>Time: %{customdata[1]} min<extra></extra>"
+                ))
+
+            fig.update_layout(
+                title={
+                    'text': f"<b>{selected_group} Playlist  by Time of Day</b>",
+                    'y':0.95,
+                    'x':0.5,
+                    'xanchor': 'center',
+                    'yanchor': 'top',
+                    'font': dict(family="CircularStd", size=16, color="white")
+                },
+                showlegend=True,
+                legend=dict(
+                    font=dict(family="CircularStd", color="white", size=12),
+                    orientation="h",
+                    yanchor="bottom", y=-0.2,
+                    xanchor="center", x=0.5
+                ),
+                paper_bgcolor='rgba(0,0,0,0)',
+                plot_bgcolor='rgba(0,0,0,0)',
+                xaxis=dict(visible=False, range=[-2.6, 2.6], fixedrange=True),
+                yaxis=dict(visible=False, range=[-2.6, 2.6], fixedrange=True),
+                margin=dict(t=80, b=100, l=10, r=10),
+                height=600,
+                hoverlabel=dict(bgcolor="#212121", font_size=14, font_family="CircularStd")
+            )
+
+            st.plotly_chart(fig, width = "stretch", theme=None, key="Playlist Bubble Chart")
+
+
 
     
 
