@@ -1005,75 +1005,66 @@ with T3:
             )
     
     detailed_df = join_2.copy()
+    my_playlists = playlists_df[my_id_filter]
 
     if selected_group == "All Playlists":
         final_analysis_df = detailed_df
+        Total_songs = my_playlists["tracks"].sum()
         
     elif selected_group == "Others":
         final_analysis_df = detailed_df[~detailed_df['name_y'].isin(top_4_names)]
+        filtered_playlist_df = my_playlists[~my_playlists['name'].isin(top_4_names)]
+        Total_songs = filtered_playlist_df["tracks"].sum()
         
     else:
         final_analysis_df = detailed_df[detailed_df['name_y'] == selected_group]
+        filtered_playlist_df = my_playlists[my_playlists['name'] == selected_group]
+        Total_songs = filtered_playlist_df["tracks"].sum()
 
-
-
-
-    # ------------ Barh Plot -------------
-    with T3_col4:
+    with T3_col2:
         with st.container(border=True):
-            barh_data = (final_analysis_df.groupby("day")['duration_minutes'].sum().sort_values(ascending = True)).reset_index()
-            barh_data.columns = ['Days', 'Minutes Listened']
-            total_minutes = barh_data['Minutes Listened'].sum()
-            barh_data['percent'] = (barh_data['Minutes Listened'] / total_minutes * 100).round(1).astype(str) + '%'
-            max_val = barh_data['Minutes Listened'].max()
-            colors = ['#EC5800' if val == max_val else '#1DB954' for val in barh_data['Minutes Listened']]
+            #------ Most Listened -------
+            most_listened_songs = final_analysis_df['name_x'].value_counts().reset_index()
+            most_listened_songs.columns = ['name','play_counts']
+            most_listened_percentage = (most_listened_songs['play_counts'].max() / most_listened_songs['play_counts'].sum()) * 100
 
-            fig = px.bar(
-                barh_data,
-                x='Minutes Listened',
-                y='Days',
-                orientation='h',
-                title=f"{selected_group} Playlist Top Listening Days",
-                custom_data=['percent']
-            )
+            most_listened_artist = final_analysis_df['artist_id'].value_counts().reset_index()
+            most_listened_artist.columns = ['artist_id','play_counts']
+            right_df_unique = final_analysis_df.drop_duplicates(subset=['artist_id'])
+            most_listened_artists = pd.merge( most_listened_artist, right_df_unique, on="artist_id", how="left" )
+            most_listened_artists_df = most_listened_artists[['artist_name','play_counts']]
+            most_listened_artist_percentage = (most_listened_artist['play_counts'].max() / most_listened_artist['play_counts'].sum()) * 100
 
-            # 3. Update Hover and Styling
-            fig.update_traces(
-                marker_color=colors,
-                hovertemplate="<b>%{y}</b><br>Minutes: %{x}<br>Share: %{customdata[0]}<extra></extra>",
-                marker_line_width=0
-            )
+
+
             
-            fig.update_traces(
-                    marker_color=colors,
-                    marker_line_width=0,
-                    textposition='outside',
-                    textfont_size=14, 
-                    cliponaxis=False      
-                )
+            #--------- Most Listened songs ---------
+            st.markdown("### Playlist Stats")
+            st.metric(
+                label="Total_songs", 
+                value=f"{Total_songs}", 
+                delta=f"{most_listened_percentage:.2f}% Of Total",
+                delta_color="normal"
+            )
+            st.markdown("---")
             
-            fig.update_xaxes(showgrid=False)
-            fig.update_yaxes(showgrid=False, showticklabels=True, tickfont=dict(size=14, color='white'))
-            fig.update_layout(
-                font=dict(family="CircularStd"),
-                xaxis_title=None,
-                yaxis_title=None,
-                showlegend=False, 
-                margin=dict(l=150),
-                bargap=0.2  
+            #----------Most Listened Artists---------
+            st.metric(
+                label="Most Listened Artist", 
+                value=f"{most_listened_artists_df.iloc[0,0]}", 
+                delta=f"{most_listened_artist_percentage:.2f}% Of Total",
+                delta_color="normal"
+            )
+            st.markdown("---")
+            
+            # --------Playlist Play rate-------
+            st.metric(
+                label="Playlist Play Rate", 
+                value=f"{perc_of_overall_listn:.1f}%", 
+                delta="Overall Listening",
+                delta_color="off" # This keeps the text but removes the color/arrow logic
             )
 
-            fig.update_layout(
-                paper_bgcolor='rgba(0,0,0,0)',
-                plot_bgcolor='rgba(0,0,0,0)',
-                hovermode="x unified"
-            )
-
-            fig.update_layout( 
-                xaxis=dict(showspikes=False),  
-                yaxis=dict(showspikes=False)   
-            )
-            st.plotly_chart(fig, width = "stretch", theme=None, key="playlist_listening_barh_plot")
 
     with T3_col3:
         with st.container(border=True):
@@ -1178,49 +1169,66 @@ with T3:
                 delta_color="normal"
             )
 
+        # ------------ Barh Plot -------------
+    with T3_col4:
+        with st.container(border=True):
+            barh_data = (final_analysis_df.groupby("day")['duration_minutes'].sum().sort_values(ascending = True)).reset_index()
+            barh_data.columns = ['Days', 'Minutes Listened']
+            total_minutes = barh_data['Minutes Listened'].sum()
+            barh_data['percent'] = (barh_data['Minutes Listened'] / total_minutes * 100).round(1).astype(str) + '%'
+            max_val = barh_data['Minutes Listened'].max()
+            colors = ['#EC5800' if val == max_val else '#1DB954' for val in barh_data['Minutes Listened']]
+
+            fig = px.bar(
+                barh_data,
+                x='Minutes Listened',
+                y='Days',
+                orientation='h',
+                title=f"{selected_group} Playlist Top Listening Days",
+                custom_data=['percent']
+            )
+
+            # 3. Update Hover and Styling
+            fig.update_traces(
+                marker_color=colors,
+                hovertemplate="<b>%{y}</b><br>Minutes: %{x}<br>Share: %{customdata[0]}<extra></extra>",
+                marker_line_width=0
+            )
+            
+            fig.update_traces(
+                    marker_color=colors,
+                    marker_line_width=0,
+                    textposition='outside',
+                    textfont_size=14, 
+                    cliponaxis=False      
+                )
+            
+            fig.update_xaxes(showgrid=False)
+            fig.update_yaxes(showgrid=False, showticklabels=True, tickfont=dict(size=14, color='white'))
+            fig.update_layout(
+                font=dict(family="CircularStd"),
+                xaxis_title=None,
+                yaxis_title=None,
+                showlegend=False, 
+                margin=dict(l=150),
+                bargap=0.2  
+            )
+
+            fig.update_layout(
+                paper_bgcolor='rgba(0,0,0,0)',
+                plot_bgcolor='rgba(0,0,0,0)',
+                hovermode="x unified"
+            )
+
+            fig.update_layout( 
+                xaxis=dict(showspikes=False),  
+                yaxis=dict(showspikes=False)   
+            )
+            st.plotly_chart(fig, width = "stretch", theme=None, key="playlist_listening_barh_plot")
+
     
 
-    with T3_col2:
-        with st.container(border=True):
-            #------ Most Listened -------
-            most_listened_songs = final_analysis_df['name_x'].value_counts().reset_index()
-            most_listened_songs.columns = ['name','play_counts']
-            most_listened_percentage = (most_listened_songs['play_counts'].max() / most_listened_songs['play_counts'].sum()) * 100
-
-            most_listened_artist = final_analysis_df['artist_id'].value_counts().reset_index()
-            most_listened_artist.columns = ['artist_id','play_counts']
-            right_df_unique = final_analysis_df.drop_duplicates(subset=['artist_id'])
-            most_listened_artists = pd.merge( most_listened_artist, right_df_unique, on="artist_id", how="left" )
-            most_listened_artists_df = most_listened_artists[['artist_name','play_counts']]
-            most_listened_artist_percentage = (most_listened_artist['play_counts'].max() / most_listened_artist['play_counts'].sum()) * 100
-
-            
-            #--------- Most Listened songs ---------
-            st.markdown("### Playlist Stats")
-            st.metric(
-                label="Total_songs", 
-                value=f"{most_listened_songs.iloc[0,0]}", 
-                delta=f"{most_listened_percentage:.2f}% Of Total",
-                delta_color="normal"
-            )
-            st.markdown("---")
-            
-            #----------Most Listened Artists---------
-            st.metric(
-                label="Most Listened Artist", 
-                value=f"{most_listened_artists_df.iloc[0,0]}", 
-                delta=f"{most_listened_artist_percentage:.2f}% Of Total",
-                delta_color="normal"
-            )
-            st.markdown("---")
-            
-            # --------Playlist Play rate-------
-            st.metric(
-                label="Playlist Play Rate", 
-                value=f"{perc_of_overall_listn:.1f}%", 
-                delta="Overall Listening",
-                delta_color="off" # This keeps the text but removes the color/arrow logic
-            )
+    
 
 
     
