@@ -990,17 +990,21 @@ with T3:
                 key="multi_linegraph"
             )
     
+    # ----------- Plots ----------------
+    T3_col2, T3_col3, T3_col4 = st.columns([0.5, 1, 0.8])
+
     # ------------ Filter ------------
     filter_options = top_4_names + ["Others", "All Playlists"]
 
-    selected_group = st.selectbox(
-        "Select Playlist View for Detailed Analysis",
-        options=filter_options,
-        index=5 
-    )
+    with T3_col2:
+        with st.container(border=True):
+            selected_group = st.selectbox(
+                "Select Playlist View for Detailed Analysis",
+                options=filter_options,
+                index=5 
+            )
     
     detailed_df = join_2.copy()
-    print(detailed_df.columns.to_list())
 
     if selected_group == "All Playlists":
         final_analysis_df = detailed_df
@@ -1012,11 +1016,10 @@ with T3:
         final_analysis_df = detailed_df[detailed_df['name_y'] == selected_group]
 
 
-    # ----------- Plots ----------------
-    T3_col2, T3_col3, T3_col4 = st.columns([0.8, 1, 0.5])
+
 
     # ------------ Barh Plot -------------
-    with T3_col2:
+    with T3_col4:
         with st.container(border=True):
             barh_data = (final_analysis_df.groupby("day")['duration_minutes'].sum().sort_values(ascending = True)).reset_index()
             barh_data.columns = ['Days', 'Minutes Listened']
@@ -1161,6 +1164,63 @@ with T3:
 
             st.plotly_chart(fig, width = "stretch", theme=None, key="Playlist Bubble Chart")
 
+     # --------- KPI below the Barh Plot ----------       
+    with T3_col4:
+        with st.container(border=True):
+            most_listened_songs = final_analysis_df['name_x'].value_counts().reset_index()
+            most_listened_songs.columns = ['name','play_counts']
+            most_listened_percentage = (most_listened_songs['play_counts'].max() / most_listened_songs['play_counts'].sum()) * 100
+
+            st.metric(
+                label="Most Listened Song", 
+                value=f"{most_listened_songs.iloc[0,0]}", 
+                delta=f"{most_listened_percentage:.2f}% Of Total",
+                delta_color="normal"
+            )
+
+    
+
+    with T3_col2:
+        with st.container(border=True):
+            #------ Most Listened -------
+            most_listened_songs = final_analysis_df['name_x'].value_counts().reset_index()
+            most_listened_songs.columns = ['name','play_counts']
+            most_listened_percentage = (most_listened_songs['play_counts'].max() / most_listened_songs['play_counts'].sum()) * 100
+
+            most_listened_artist = final_analysis_df['artist_id'].value_counts().reset_index()
+            most_listened_artist.columns = ['artist_id','play_counts']
+            right_df_unique = final_analysis_df.drop_duplicates(subset=['artist_id'])
+            most_listened_artists = pd.merge( most_listened_artist, right_df_unique, on="artist_id", how="left" )
+            most_listened_artists_df = most_listened_artists[['artist_name','play_counts']]
+            most_listened_artist_percentage = (most_listened_artist['play_counts'].max() / most_listened_artist['play_counts'].sum()) * 100
+
+            
+            #--------- Most Listened songs ---------
+            st.markdown("### Playlist Stats")
+            st.metric(
+                label="Total_songs", 
+                value=f"{most_listened_songs.iloc[0,0]}", 
+                delta=f"{most_listened_percentage:.2f}% Of Total",
+                delta_color="normal"
+            )
+            st.markdown("---")
+            
+            #----------Most Listened Artists---------
+            st.metric(
+                label="Most Listened Artist", 
+                value=f"{most_listened_artists_df.iloc[0,0]}", 
+                delta=f"{most_listened_artist_percentage:.2f}% Of Total",
+                delta_color="normal"
+            )
+            st.markdown("---")
+            
+            # --------Playlist Play rate-------
+            st.metric(
+                label="Playlist Play Rate", 
+                value=f"{perc_of_overall_listn:.1f}%", 
+                delta="Overall Listening",
+                delta_color="off" # This keeps the text but removes the color/arrow logic
+            )
 
 
     
