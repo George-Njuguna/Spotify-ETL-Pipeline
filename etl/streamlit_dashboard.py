@@ -14,8 +14,6 @@ from Functions import import_data
 
 load_dotenv()
 
-st.set_page_config(page_title="My Dashboard", layout="wide")
-
 st.markdown("""
 <style>
     .stApp {
@@ -40,7 +38,17 @@ st.markdown("""
     html, body, [class*="css"], div, span, p {
         font-family: 'CircularStd', sans-serif;
     }
-
+            
+    /* The line under the active tab */
+    div[data-baseweb="tab-highlight"] {
+        background-color: #1DB954 !important;
+    }
+            
+    /* Selectbox/Input Focus Border Color */
+    div[data-baseweb="select"] > div {
+        border-color: #1DB954 !important;
+    }       
+            
     /* KPI / Metric Styling */
     div[data-testid="stMetric"] {
         text-align: center;
@@ -61,7 +69,23 @@ st.markdown("""
     h1, h2, h3, p {
         color: white !important;
     }
+            
     
+    header[data-testid="stHeader"] {
+        height: 3rem !important;
+        background-color: rgba(0,0,0,0) !important; /* Makes it blend with your black background */
+    }
+
+    
+    .block-container {
+        padding-top: 0rem !important; /* Brings content closer to the top */
+        padding-left: 1rem !important;   /* Keeps a small gap on the left */
+        padding-right: 1rem !important;
+        max-width: 100%; 
+
+    #root > div:nth-child(1) > div > div > div > div > section > div {
+        padding-top: 0rem !important;
+    }
             
     /* =====================
     Text Hover Color
@@ -362,7 +386,7 @@ with T2:
     with st.expander("⚙ Filters"):
         enable_date_filter = st.checkbox("Filter by date", value=False)
 
-        col_f1, col_f2 = st.columns(2)
+        col_f1, col_f2 = st.columns(2) 
         with col_f1:
             start_dt = st.date_input(
                 "From",
