@@ -935,60 +935,60 @@ with T3:
     )
 
     with T3_col1:
-            with st.container(border=True):
-                fig1 = px.line(
-                    multi_line_data,
-                    x="Day",
-                    y="Minutes Played",
-                    color="Playlist Group",
-                    line_shape="spline",
-                    title="Listening Trends: Top 4 Playlists vs Others",
-                    color_discrete_sequence=["#1DB954", "#EE9B00", '#7000FF', "#0A9396", "#AE2012"]
-                )
+        with st.container(border=True):
+            fig1 = px.line(
+                multi_line_data,
+                x="Day",
+                y="Minutes Played",
+                color="Playlist Group",
+                line_shape="spline",
+                title="Listening Trends: Top 4 Playlists vs Others",
+                color_discrete_sequence=["#1DB954", "#EE9B00", '#7000FF', "#0A9396", "#AE2012"]
+            )
 
-                #  Only show the minute value
-                fig1.update_traces(
-                    mode="lines", 
-                    line=dict(width=3),
-                    hovertemplate="<b>Minutes:</b> %{y:.0f}<extra></extra>"
-                )
+            #  Only show the minute value
+            fig1.update_traces(
+                mode="lines", 
+                line=dict(width=3),
+                hovertemplate="<b>Minutes:</b> %{y:.0f}<extra></extra>"
+            )
 
-                fig1.update_layout(
-                    hovermode="closest",
-                    showlegend=True,
-                    paper_bgcolor='rgba(0,0,0,0)',
-                    plot_bgcolor='rgba(0,0,0,0)',
-                    font=dict(family="CircularStd"),
-                    
-                    xaxis=dict(
-                        showgrid=False, 
-                        title=None, 
-                        showspikes=False, 
-                        fixedrange=True
-                    ),
-                    yaxis=dict(
-                        showgrid=False, 
-                        title=None, 
-                        showticklabels=False, 
-                        showspikes=False, 
-                        fixedrange=True
-                    ),
-                    legend=dict(
-                        orientation="h",
-                        yanchor="bottom", y=-0.3,
-                        xanchor="center", x=0.5,
-                        title=None
-                    ),
-                    margin=dict(l=20, r=20, t=50, b=80)
-                )
+            fig1.update_layout(
+                hovermode="closest",
+                showlegend=True,
+                paper_bgcolor='rgba(0,0,0,0)',
+                plot_bgcolor='rgba(0,0,0,0)',
+                font=dict(family="CircularStd"),
+                
+                xaxis=dict(
+                    showgrid=False, 
+                    title=None, 
+                    showspikes=False, 
+                    fixedrange=True
+                ),
+                yaxis=dict(
+                    showgrid=False, 
+                    title=None, 
+                    showticklabels=False, 
+                    showspikes=False, 
+                    fixedrange=True
+                ),
+                legend=dict(
+                    orientation="h",
+                    yanchor="bottom", y=-0.3,
+                    xanchor="center", x=0.5,
+                    title=None
+                ),
+                margin=dict(l=20, r=20, t=50, b=80)
+            )
 
-                st.plotly_chart(
-                    fig1, 
-                    width='stretch', 
-                    theme=None, 
-                    config={'displayModeBar': False}, 
-                    key="multi_linegraph"
-                )
+            st.plotly_chart(
+                fig1, 
+                width='stretch', 
+                theme=None, 
+                config={'displayModeBar': False}, 
+                key="multi_linegraph"
+            )
     
     # ------------ Filter ------------
     filter_options = top_4_names + ["Others", "All Playlists"]
@@ -999,5 +999,82 @@ with T3:
         index=5 
     )
     
+    detailed_df = join_2.copy()
+    print(detailed_df.columns.to_list())
+
+    if selected_group == "All Playlists":
+        final_analysis_df = detailed_df
+        
+    elif selected_group == "Others":
+        final_analysis_df = detailed_df[~detailed_df['name_y'].isin(top_4_names)]
+        
+    else:
+        final_analysis_df = detailed_df[detailed_df['name_y'] == selected_group]
+
+
+    # ----------- Plots ----------------
+    T3_col2, T3_col3, T3_col4 = st.columns([0.8, 1, 0.5])
+
+    # ------------ Barh Plot -------------
+    with T3_col2:
+        with st.container(border=True):
+            barh_data = (final_analysis_df.groupby("day")['duration_minutes'].sum().sort_values(ascending = True)).reset_index()
+            barh_data.columns = ['Days', 'Minutes Listened']
+            total_minutes = barh_data['Minutes Listened'].sum()
+            barh_data['percent'] = (barh_data['Minutes Listened'] / total_minutes * 100).round(1).astype(str) + '%'
+            max_val = barh_data['Minutes Listened'].max()
+            colors = ['#EC5800' if val == max_val else '#1DB954' for val in barh_data['Minutes Listened']]
+
+            fig = px.bar(
+                barh_data,
+                x='Minutes Listened',
+                y='Days',
+                orientation='h',
+                title=f"{selected_group} Playlist Top Listening Days",
+                custom_data=['percent']
+            )
+
+            # 3. Update Hover and Styling
+            fig.update_traces(
+                marker_color=colors,
+                hovertemplate="<b>%{y}</b><br>Minutes: %{x}<br>Share: %{customdata[0]}<extra></extra>",
+                marker_line_width=0
+            )
+            
+            fig.update_traces(
+                    marker_color=colors,
+                    marker_line_width=0,
+                    textposition='outside',
+                    textfont_size=14, 
+                    cliponaxis=False      
+                )
+            
+            fig.update_xaxes(showgrid=False)
+            fig.update_yaxes(showgrid=False, showticklabels=True, tickfont=dict(size=14, color='white'))
+            fig.update_layout(
+                font=dict(family="CircularStd"),
+                xaxis_title=None,
+                yaxis_title=None,
+                showlegend=False, 
+                margin=dict(l=150),
+                bargap=0.2  
+            )
+
+            fig.update_layout(
+                paper_bgcolor='rgba(0,0,0,0)',
+                plot_bgcolor='rgba(0,0,0,0)',
+                hovermode="x unified"
+            )
+
+            fig.update_layout( 
+                xaxis=dict(showspikes=False),  
+                yaxis=dict(showspikes=False)   
+            )
+            st.plotly_chart(fig, width = "stretch", theme=None, key="playlist_listening_barh_plot")
+
+
+    
+
+
 
     
