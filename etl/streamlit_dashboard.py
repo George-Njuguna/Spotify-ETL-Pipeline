@@ -862,13 +862,17 @@ with T2:
                 
                 playlist_data = pd.merge(dt2, playlist_songs_df, left_on = "id" ,right_on = "track_id", how = "inner") 
                 albums_data = pd.merge(dt2, saved_albums_df , left_on = "album_id" ,right_on = "id", how = "inner") 
-                saved_data = pd.merge(dt2, saved_tracks_df ,left_on = "album_id" ,right_on = "album_id", how = "inner") 
+                saved_data = pd.merge(dt2, saved_tracks_df ,left_on = "id" ,right_on = "id", how = "inner") 
                 artist_data = pd.merge(dt2, followed_artists_df ,left_on = "artist_id" ,right_on = "id", how = "inner") 
 
                 bar_data = pd.DataFrame({
                     "song_type": ["Playlists", "Albums", "Saved Songs" , "Followed Artists"],
                     "count": [(playlist_data.shape)[0], (albums_data.shape)[0], (saved_data.shape)[0], (artist_data.shape)[0]] 
                 })
+
+                bar_data["percentage"] = (
+                    bar_data["count"] / bar_data["count"].sum()
+                ) * 100
 
                 # ----------- Plotting bar Graph ------------
                 max_val = bar_data['count'].max()
@@ -878,12 +882,14 @@ with T2:
                     bar_data,
                     x="song_type",
                     y="count",
-                    title="Source Of Listening Tracks"
+                    title="Source Of Listening Tracks",
+                    custom_data=["percentage"] 
                 )
 
                 fig.update_traces(
                     marker_color=colors,  
-                    marker_line_width=0      
+                    marker_line_width=0,
+                    hovertemplate="%{customdata[0]:.2f}%<extra></extra>"    
                 )
             
                 fig.update_xaxes(showgrid=False)
