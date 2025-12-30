@@ -1296,14 +1296,15 @@ with T4:
     print(most_listened_album)
     #------- metrices calc-------
     perc_album_overall_listn = (most_listened_album['play_counts'].max() /  most_listened_album['play_counts'].sum())*100
+    perc_uniq = (album_listening_df['album_id'].nunique() / (saved_albums_df.shape)[0]) * 100
 
      # ------------ KPIS ----------------
     k1, k2, k3, k4, k5 = st.columns([1,1,1,1,1], border=True)
     k1.metric("Total Albums Listened", f"{(album_listening_df.shape)[0]}")
-    k2.metric("Unique Albums Listened", f"{album_listening_df['album_id'].nunique()}")
+    k2.metric("Unique Albums Listened", f"{album_listening_df['album_id'].nunique()}" , f"{perc_uniq:.2f}% Of Saved Albums")
     k3.metric("Saved Albums Count", f"{(saved_albums_df.shape)[0]}")
     k4.metric("Most Played Album", f"{most_listened_album.iloc[0,1]}", f"{perc_album_overall_listn:.2f}% Of Overall Listened Albums")
-    k5.metric("Average Track Count", saved_albums_df['tracks'].sum())
+    k5.metric("Average Track Count", round(saved_albums_df['tracks'].mean()))
 
     
     
