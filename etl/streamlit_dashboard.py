@@ -914,7 +914,7 @@ with T2:
 
                 st.plotly_chart(fig, width = "stretch", theme="streamlit", key="sorce of listening tracks Bar")
 
- # ----------- Playlists ---------------
+# ----------- Playlists ---------------
 with T3:
     #---- my id------
     my_id = "43rd4xexolpiac081m1ngw5ue"
@@ -1263,6 +1263,33 @@ with T3:
             )
             st.plotly_chart(fig, width = "stretch", theme=None, key="playlist_listening_barh_plot")
 
+#------------ Albums -----------------
+with T4:
+
+     # ------- calcs ----------
+     # ---- albums listened ------
+    album_join  = pd.merge(recently_played_df, saved_albums_df, left_on = "album_id" ,right_on = "id", how = "inner")
+    print(album_join.columns.to_list())
+
+    album_join["run_id"] = (album_join["album_id"] != album_join["album_id"].shift()).cumsum()
+    album_join["run_length"] = album_join.groupby("run_id")["album_id"].transform("size")
+
+    album_join["listened_full_album"] = (
+        (album_join["run_length"] >= album_join["tracks"])
+        & (album_join["album_id"] != album_join["album_id"].shift())
+    )
+    album_listening_df = album_join[album_join['listened_full_album'] == True ]
+    print(album_listening_df.columns.to_list())
+
+     # ------------ KPIS ----------------
+    k1, k2, k3, k4, K5 = st.columns([1,1,1,1,1], border=True)
+    k1.metric("Total Albums Listened", f"{(album_listening_df.shape)[0]}")
+    k2.metric("Unique Albums Listened", f"{playlists_df["tracks"].sum()}")
+    k3.metric("Saved Albums Count", f"{(saved_albums_df.shape)[0]}")
+    k4.metric("Most Played Album", f"{most_listened_playlists.iloc[0,0]}", f"{perc_of_overall_listn:.2f}% Of Overall Listened Songs")
+    k5.metric("Average Track Count", f"{(playlists_df[public_playlist_filter].shape)[0]}", f"{perc_of_total_public:.2f}% Of Total Playlists")
+
+    
     
 
     
