@@ -1307,6 +1307,31 @@ with T4:
     k5.metric("Average Track Count", round(saved_albums_df['tracks'].mean()))
 
     
+    with st.expander("⚙ Filters"):
+        enable_date_filter = st.checkbox("Filter by date", value=False , key = 'albums checkbox')
+
+        col_f1, col_f2 = st.columns(2)
+        with col_f1:
+            start_dt = st.date_input(
+                "From",
+                value=min_date, 
+                min_value=min_date,
+                max_value=max_date,
+                disabled=not enable_date_filter,
+                key = 'album start date'
+            )
+
+        with col_f2:
+            end_dt = st.date_input(
+                "To",
+                value=None, 
+                min_value=start_dt,
+                max_value=max_date,
+                disabled=not enable_date_filter,
+                key = 'album end date'
+            )
+
+    
     
 
     
