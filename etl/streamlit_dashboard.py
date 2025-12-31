@@ -1293,7 +1293,6 @@ with T4:
         .sort_values(by="counts", ascending=False)
     )
     most_listened_album.columns = ['album_id','album_name','play_counts']
-    print(most_listened_album)
     #------- metrices calc-------
     perc_album_overall_listn = (most_listened_album['play_counts'].max() /  most_listened_album['play_counts'].sum())*100
     perc_uniq = (album_listening_df['album_id'].nunique() / (saved_albums_df.shape)[0]) * 100
