@@ -1283,7 +1283,6 @@ with T4:
         & (album_join["album_id"] != album_join["album_id"].shift())
     )
     album_listening_df = album_join[album_join['listened_full_album'] == True ]
-    print(album_listening_df.columns.to_list())
 
     most_listened_album = (
         album_listening_df.groupby(["album_id", "album_name"])
