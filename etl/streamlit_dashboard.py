@@ -1321,9 +1321,24 @@ with T4:
         plot_album_data = album_join.copy()
         mess = "Daily Album Listening Trend"
 
+        # ------- popularity -------
+        heading = "Average Popularity"
+        pop = (saved_albums_df["popularity"].sum() /  (saved_albums_df.shape)[0]) 
+
+        # ------- Tracks ------
+        tracks = saved_albums_df["tracks"].sum()
+
     else:
         plot_album_data = album_join[album_join['album_name'] == selected_group]
         mess = f"Daily {selected_group} Album Listening Trend"
+
+        # ------- popularity -------
+        heading = "Popularity"
+        pop = saved_albums_df.loc[saved_albums_df['name'] == selected_group, 'popularity'].iloc[0]
+
+        # ------- Tracks ------
+        tracks = saved_albums_df.loc[saved_albums_df['name'] == selected_group, 'tracks'].iloc[0]
+        perc_tracks = (tracks / saved_albums_df["tracks"].sum()) * 100
 
     
     with T4_col1:
@@ -1364,5 +1379,39 @@ with T4:
             fig.update_layout(font=dict(family="CircularStd"))
 
             st.plotly_chart(fig, width='stretch', theme="streamlit", key = "album listening stats line Graph")
+
+    with T4_col2:
+        with st.container(border=True):
+            #------ Most Listened Song on album -------
+            most_listened_songs = plot_album_data['name_x'].value_counts().reset_index()
+            most_listened_songs.columns = ['name','play_counts']
+            most_listened_percentage = (most_listened_songs['play_counts'].max() / most_listened_songs['play_counts'].sum()) * 100
+            
+            
+            #--------- Total songs ---------
+            st.markdown("### Album Stats")
+            st.metric(
+                label="Total songs", 
+                value=f"{tracks}", 
+                delta_color="normal"
+            )
+            st.markdown("---")
+            
+            #---------- popularity ---------
+            st.metric(
+                label = heading, 
+                value=f"{pop:.1f}", 
+                delta_color="normal"
+            )
+            st.markdown("---")
+            
+            # --------Playlist Play rate-------
+            st.metric(
+                label="Playlist Play Rate", 
+                value=f"{play_rate:.1f}%", 
+                delta="Of Overall Listening Time",
+                delta_color="normal" 
+            )
+
 
             
