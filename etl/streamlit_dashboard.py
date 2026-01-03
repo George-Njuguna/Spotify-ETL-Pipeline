@@ -1305,6 +1305,84 @@ with T4:
     k4.metric("Most Played Album", f"{most_listened_album.iloc[0,1]}", f"{perc_album_overall_listn:.2f}% Of Overall Listened Albums")
     k5.metric("Average Track Count", round(saved_albums_df['tracks'].mean()))
 
+     #------------ Multi line graph------------
+    T4_col1 = st.columns(1)[0]
+    top_4_album_names = most_listened_album.iloc[0:4, 1].tolist()
+
+    album_join['Album Group'] = album_join['album_name'].apply(
+        lambda x: x if x in top_4_album_names else 'Others'
+    )
+
+    multi_line_data = (
+        album_join.groupby('Album Group')
+        .resample("5D", on="played_at")["duration_minutes"]
+        .sum()
+        .rolling(3)
+        .mean()
+        .reset_index()
+    )
+
+    multi_line_data = multi_line_data.rename(
+        columns={"duration_minutes": "Minutes Played", "played_at": "Day"}
+    )
+
+    with T4_col1:
+        with st.container(border=True):
+            fig1 = px.line(
+                multi_line_data,
+                x="Day",
+                y="Minutes Played",
+                color="Album Group",
+                line_shape="spline",
+                title="Listening Trends: Top 4 Albums vs Others",
+                color_discrete_sequence=["#1DB954", "#EE9B00", '#7000FF', "#0A9396", "#AE2012"]
+            )
+
+            #  Only show the minute value
+            fig1.update_traces(
+                mode="lines", 
+                line=dict(width=3),
+                hovertemplate="<b>Minutes:</b> %{y:.0f}<extra></extra>"
+            )
+
+            fig1.update_layout(
+                hovermode="closest",
+                showlegend=True,
+                paper_bgcolor='rgba(0,0,0,0)',
+                plot_bgcolor='rgba(0,0,0,0)',
+                font=dict(family="CircularStd"),
+                
+                xaxis=dict(
+                    showgrid=False, 
+                    title=None, 
+                    showspikes=False, 
+                    fixedrange=True
+                ),
+                yaxis=dict(
+                    showgrid=False, 
+                    title=None, 
+                    showticklabels=False, 
+                    showspikes=False, 
+                    fixedrange=True
+                ),
+                legend=dict(
+                    orientation="h",
+                    yanchor="bottom", y=-0.3,
+                    xanchor="center", x=0.5,
+                    title=None
+                ),
+                margin=dict(l=20, r=20, t=50, b=80)
+            )
+
+            st.plotly_chart(
+                fig1, 
+                width='stretch', 
+                theme=None, 
+                config={'displayModeBar': False}, 
+                key="multi_Album_linegraph"
+            )
+    
+
     
     
 
