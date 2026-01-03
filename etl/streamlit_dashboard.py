@@ -1318,94 +1318,52 @@ with T4:
                 index=5
             )
 
+    if selected_group == 'All Albums':
+        plot_album_data = album_join.copy()
+        mess = "Daily Album Listening Trend"
+
+    else:
+        plot_album_data = album_join[album_join['album_name'] == selected_group]
+        mess = f"Daily {selected_group} Album Listening Trend"
+
     
     with T4_col1:
         with st.container(border=True):
-            if selected_group == 'All Albums':
-                album_listening_daily = album_join.resample("3d", on="played_at")["duration_minutes"].sum().rolling(3).mean().rename("All").reset_index()
-                album_df_melted = album_listening_daily.rename(columns={"All": "Total Listening Time (Minute)", "played_at" : "Day"})
-                fig = px.line(
-                    album_df_melted,
-                    x="Day",
-                    y="Total Listening Time (Minute)",
-                    line_shape="spline",
-                    title="Daily Album Listening Trend"
-                )
+            album_listening_daily = plot_album_data.resample("3d", on="played_at")["duration_minutes"].sum().rolling(3).mean().rename("All").reset_index()
+            album_df_melted = album_listening_daily.rename(columns={"All": "Total Listening Time (Minute)", "played_at" : "Day"})
+            fig = px.line(
+                album_df_melted,
+                x="Day",
+                y="Total Listening Time (Minute)",
+                line_shape="spline",
+                title=mess
+            )
 
-                fig.update_traces(
-                    line_color='#1DB954',
-                    fillcolor='rgba(29, 185, 84, 0.3)',
-                    mode="lines+markers",
-                    marker=dict(color='#1DB954', size=6)
-                )
-                
-                fig.update_layout(
-                    paper_bgcolor='rgba(0,0,0,0)',
-                    plot_bgcolor='rgba(0,0,0,0)',
-                    hovermode="x unified"
-                )
+            fig.update_traces(
+                line_color='#1DB954',
+                fillcolor='rgba(29, 185, 84, 0.3)',
+                mode="lines+markers",
+                marker=dict(color='#1DB954', size=6)
+            )
+            
+            fig.update_layout(
+                paper_bgcolor='rgba(0,0,0,0)',
+                plot_bgcolor='rgba(0,0,0,0)',
+                hovermode="x unified"
+            )
 
-                fig.update_layout( 
-                    xaxis=dict(showspikes=False),  
-                    yaxis=dict(showspikes=False)   
-                )
+            fig.update_layout( 
+                xaxis=dict(showspikes=False),  
+                yaxis=dict(showspikes=False)   
+            )
 
-                fig.update_traces(mode="lines+markers")
-                fig.update_xaxes(showgrid=False)
-                fig.update_xaxes(showline=False)
-                fig.update_yaxes(showgrid=False)
-                fig.update_yaxes(showticklabels=False)
-                fig.update_layout(font=dict(family="CircularStd"))
+            fig.update_traces(mode="lines+markers")
+            fig.update_xaxes(showgrid=False)
+            fig.update_xaxes(showline=False)
+            fig.update_yaxes(showgrid=False)
+            fig.update_yaxes(showticklabels=False)
+            fig.update_layout(font=dict(family="CircularStd"))
 
-                st.plotly_chart(fig, width='stretch', theme="streamlit", key = "album listening stats line Graph")
+            st.plotly_chart(fig, width='stretch', theme="streamlit", key = "album listening stats line Graph")
 
-            else:
-                album_listening_daily = album_join[album_join['album_name'] == selected_group].resample("3d", on="played_at")["duration_minutes"].sum().rolling(3).mean().rename("All").reset_index()
-                album_df_melted = album_listening_daily.rename(columns={"All": "Total Listening Time (Minute)", "played_at" : "Day"})
-                fig = px.line(
-                    album_df_melted,
-                    x="Day",
-                    y="Total Listening Time (Minute)",
-                    line_shape="spline",
-                    title = f"Daily {selected_group} Album Listening Trend"
-                )
-
-                fig.update_traces(
-                    line_color='#1DB954',
-                    fillcolor='rgba(29, 185, 84, 0.3)',
-                    mode="lines+markers",
-                    marker=dict(color='#1DB954', size=6)
-                )
-                
-                fig.update_layout(
-                    paper_bgcolor='rgba(0,0,0,0)',
-                    plot_bgcolor='rgba(0,0,0,0)',
-                    hovermode="x unified"
-                )
-
-                fig.update_layout( 
-                    xaxis=dict(showspikes=False),  
-                    yaxis=dict(showspikes=False)   
-                )
-
-                fig.update_traces(mode="lines+markers")
-                fig.update_xaxes(showgrid=False)
-                fig.update_xaxes(showline=False)
-                fig.update_yaxes(showgrid=False)
-                fig.update_yaxes(showticklabels=False)
-                fig.update_layout(font=dict(family="CircularStd"))
-
-                st.plotly_chart(fig, width='stretch', theme="streamlit", key = "album listening stats line Graph")
-
-
-                
-                
-
-                
-                
-
-                
-
-
-
-                
+            
