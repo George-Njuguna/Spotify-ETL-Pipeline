@@ -1386,7 +1386,9 @@ with T4:
             most_listened_songs = plot_album_data['name_x'].value_counts().reset_index()
             most_listened_songs.columns = ['name','play_counts']
             most_listened_percentage = (most_listened_songs['play_counts'].max() / most_listened_songs['play_counts'].sum()) * 100
-            
+
+            #------ Album Play rate-------
+            play_rate = (plot_album_data["duration_minutes"].sum() / overall_listening_time) * 100
             
             #--------- Total songs ---------
             st.markdown("### Album Stats")
@@ -1407,7 +1409,7 @@ with T4:
             
             # --------Playlist Play rate-------
             st.metric(
-                label="Playlist Play Rate", 
+                label="Album Play Rate", 
                 value=f"{play_rate:.1f}%", 
                 delta="Of Overall Listening Time",
                 delta_color="normal" 
