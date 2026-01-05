@@ -1389,10 +1389,7 @@ with T4:
 
     with T4_col2:
         with st.container(border=True):
-            #------ Most Listened Song on album -------
-            most_listened_songs = plot_album_data['name_x'].value_counts().reset_index()
-            most_listened_songs.columns = ['name','play_counts']
-            most_listened_percentage = (most_listened_songs['play_counts'].max() / most_listened_songs['play_counts'].sum()) * 100
+            
 
             
             #--------- Total songs ---------
@@ -1419,6 +1416,167 @@ with T4:
                 delta="Of Overall Listening Time" if selected_group == 'All Albums' else "Of Total Album Listenig Time",
                 delta_color="normal" 
             )
+
+    with T4_col3:
+        with st.container(border=True):
+            bubble_data = plot_album_data.groupby('time_frames')['duration_minutes'].sum().reset_index()
+            bubble_data.columns = ['Timeframe', 'Total Minutes']
+            max_val = bubble_data['Total Minutes'].max()
+
+            positions = {
+                "Morning": [0, 0],
+                "Late Morning": [1.0, 0.8],
+                "Midday": [-1.1, 0.5],
+                "Late AfterNoon": [0.2, -1.2],
+                "AfterNoon": [-0.8, -0.8],
+                "Evening": [-0.5, 1.3],
+                "Night": [0.9, -0.6]
+            }
+
+            # Mapping positions 
+            bubble_data['x'] = bubble_data['Timeframe'].map(lambda x: positions.get(x, [np.random.uniform(-1,1), np.random.uniform(-1,1)])[0])
+            bubble_data['y'] = bubble_data['Timeframe'].map(lambda x: positions.get(x, [0, 0])[1])
+            total_all_minutes = bubble_data['Total Minutes'].sum()
+            bubble_data['percent'] = (bubble_data['Total Minutes'] / total_all_minutes * 100).round(1).astype(str) + '%'
+
+            # Percentage 
+            total_all_minutes = bubble_data['Total Minutes'].sum()
+            bubble_data['percent'] = (bubble_data['Total Minutes'] / total_all_minutes * 100).round(1).astype(str) + '%'
+
+            # Sizing 
+            max_bubble_size = 200 
+            min_bubble_size = 50  
+            max_mins = bubble_data['Total Minutes'].max()
+
+            bubble_data['scaled_size'] = bubble_data['Total Minutes'].apply(
+                lambda x: min_bubble_size + (np.sqrt(x) / np.sqrt(max_mins)) * (max_bubble_size - min_bubble_size)
+            )
+
+            fig = go.Figure()
+
+            vibrant_palette = ["#1DB954", "#00E5FF", "#7000FF", "#FF007A", "#FFD700", "#94D2BD", "#E9D8A6"]
+
+            # ------------ Bubble Chart ------------
+            for i, row in enumerate(bubble_data.itertuples()):
+                total_mins = int(getattr(row, 'Total_Minutes', row[2]))
+                
+                fig.add_trace(go.Scatter(
+                    x=[row.x],
+                    y=[row.y],
+                    mode="markers+text", 
+                    name=str(row.Timeframe),
+                    customdata=[[row.percent, total_mins]], 
+                    marker=dict(
+                        size=[row.scaled_size], 
+                        sizemode='diameter',
+                        opacity=0.78,
+                        color=vibrant_palette[i % len(vibrant_palette)],
+                        line=dict(width=2, color='rgba(255,255,255,0.2)')
+                    ),
+                    text=row.percent,
+                    textposition="middle center",
+                    textfont=dict(family="CircularStd", size=16, color="white"),
+                    hovertemplate="<b>%{fullData.name}</b><br>Time: %{customdata[1]} min<extra></extra>"
+                ))
+
+            fig.update_layout(
+                title={
+                    'text': f"<b>{selected_group} Playlist  by Time of Day</b>",
+                    'y':0.95,
+                    'x':0.5,
+                    'xanchor': 'center',
+                    'yanchor': 'top',
+                    'font': dict(family="CircularStd", size=16, color="white")
+                },
+                showlegend=True,
+                legend=dict(
+                    font=dict(family="CircularStd", color="white", size=12),
+                    orientation="h",
+                    yanchor="bottom", y=-0.2,
+                    xanchor="center", x=0.5
+                ),
+                paper_bgcolor='rgba(0,0,0,0)',
+                plot_bgcolor='rgba(0,0,0,0)',
+                xaxis=dict(visible=False, range=[-2.6, 2.6], fixedrange=True),
+                yaxis=dict(visible=False, range=[-2.6, 2.6], fixedrange=True),
+                margin=dict(t=80, b=100, l=10, r=10),
+                height=600,
+                hoverlabel=dict(bgcolor="#212121", font_size=14, font_family="CircularStd")
+            )
+
+            st.plotly_chart(fig, width = "stretch", theme=None, key="Album Bubble Chart")
+
+     # --------- KPI above the Barh Plot ----------       
+    with T4_col4:
+        with st.container(border=True):
+            #------ Most Listened Song on album -------
+            most_listened_songs = plot_album_data['name_x'].value_counts().reset_index()
+            most_listened_songs.columns = ['name','play_counts']
+            most_listened_percentage = (most_listened_songs['play_counts'].max() / most_listened_songs['play_counts'].sum()) * 100
+
+            st.metric(
+                label="Most Listened Song", 
+                value=f"{most_listened_songs.iloc[0,0]}", 
+                delta=f"{most_listened_percentage:.2f}% Of {selected_group} Songs",
+                delta_color="normal"
+            )
+
+        # ------------ Barh Plot -------------
+    with T4_col4:
+        with st.container(border=True):
+            barh_data = (plot_album_data.groupby("day")['duration_minutes'].sum().sort_values(ascending = True)).reset_index()
+            barh_data.columns = ['Days', 'Minutes Listened']
+            total_minutes = barh_data['Minutes Listened'].sum()
+            barh_data['percent'] = (barh_data['Minutes Listened'] / total_minutes * 100).round(1).astype(str) + '%'
+            max_val = barh_data['Minutes Listened'].max()
+            colors = ['#EC5800' if val == max_val else '#1DB954' for val in barh_data['Minutes Listened']]
+
+            fig = px.bar(
+                barh_data,
+                x='Minutes Listened',
+                y='Days',
+                orientation='h',
+                title=f"{selected_group} Playlist Top Listening Days",
+                custom_data=['percent']
+            )
+
+            # 3. Update Hover and Styling
+            fig.update_traces(
+                marker_color=colors,
+                hovertemplate="<b>%{y}</b><br>Minutes: %{x}<br>Share: %{customdata[0]}<extra></extra>",
+                marker_line_width=0
+            )
+            
+            fig.update_traces(
+                    marker_color=colors,
+                    marker_line_width=0,
+                    textposition='outside',
+                    textfont_size=14, 
+                    cliponaxis=False      
+                )
+            
+            fig.update_xaxes(showgrid=False)
+            fig.update_yaxes(showgrid=False, showticklabels=True, tickfont=dict(size=14, color='white'))
+            fig.update_layout(
+                font=dict(family="CircularStd"),
+                xaxis_title=None,
+                yaxis_title=None,
+                showlegend=False, 
+                margin=dict(l=150),
+                bargap=0.2  
+            )
+
+            fig.update_layout(
+                paper_bgcolor='rgba(0,0,0,0)',
+                plot_bgcolor='rgba(0,0,0,0)',
+                hovermode="x unified"
+            )
+
+            fig.update_layout( 
+                xaxis=dict(showspikes=False),  
+                yaxis=dict(showspikes=False)   
+            )
+            st.plotly_chart(fig, width = "stretch", theme=None, key="Album_listening_barh_plot")
 
 
             
