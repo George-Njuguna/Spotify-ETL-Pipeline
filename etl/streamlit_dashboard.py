@@ -1887,34 +1887,27 @@ with T5:
 
                     dt1 = all_songs_join[all_songs_join['played_at_date'] <= max_date]
                     dt2 = saved_songs_join[saved_songs_join['played_at_date'] <= max_date]
-                    print(dt1.columns.to_list())
+                    
 
-                    pie_data = pd.DataFrame({
-                        "song_type": ["Saved songs", "Not Saved"],
-                        "count": [(dt2.shape)[0], ((dt1[dt1['name_y'].isnull()]).shape)[0]] 
-                    })
 
                 elif enable_date_filter and start_dt and not end_dt:
 
-                    dt1 = all_songs_join[all_songs_join['played_at_date']  <= start_dt]
-                    dt2 = saved_songs_join[saved_songs_join['played_at_date']  <= start_dt]
-                    print(dt1.columns.to_list())
-
-                    pie_data = pd.DataFrame({
-                        "song_type": ["Saved songs", "Not Saved"],
-                        "count": [(dt2.shape)[0], ((dt1[dt1['name_y'].isnull()]).shape)[0]] 
-                    })
+                    dt1 = all_songs_join[all_songs_join['played_at_date']  == start_dt]
+                    dt2 = saved_songs_join[saved_songs_join['played_at_date']  == start_dt]
+                    
+                    
 
                 else :
 
-                    dt1 = all_songs_join[all_songs_join['played_at_date'] <= end_dt]
-                    dt2 = saved_songs_join[saved_songs_join['played_at_date'] <= end_dt]
-                    print(dt1.columns.to_list())
+                    dt1 = all_songs_join[(all_songs_join['played_at_date'] >= start_dt) & (all_songs_join['played_at_date'] <= end_dt)]
+                    dt2 = saved_songs_join[(all_songs_join['played_at_date'] >= start_dt) & (all_songs_join['played_at_date'] <= end_dt)]
 
-                    pie_data = pd.DataFrame({
-                        "song_type": ["Saved songs", "Not Saved"],
-                        "count": [(dt2.shape)[0], ((dt1[dt1['name_y'].isnull()]).shape)[0]] 
-                    })
+                songs_played = (dt1.shape)[0]
+
+                pie_data = pd.DataFrame({
+                    "song_type": ["Saved songs", "Not Saved"],
+                    "count": [(dt2.shape)[0], ((dt1[dt1['name_y'].isnull()]).shape)[0]] 
+                })
                
 
                  # ---------- pie --------
@@ -1938,7 +1931,7 @@ with T5:
                 ) 
 
                 fig.update_layout(
-                    title="Saved Vs Unsaved Tracks",
+                    title="Saved Vs Unsaved Listening Share",
                     font=dict(family="CircularStd"),
                     paper_bgcolor='rgba(0,0,0,0)',
                     plot_bgcolor='rgba(0,0,0,0)',
@@ -1966,7 +1959,6 @@ with T5:
                 )
 
                 fig.update_traces(pull=pull_values,textinfo='none', rotation = 90) 
-                fig.update_layout(title="New Vs Replayed Tracks")
                 fig.update_layout(font=dict(family="CircularStd"))
 
                 st.plotly_chart(fig, width="stretch", theme="streamlit", key = "saved songs pie chart " )
