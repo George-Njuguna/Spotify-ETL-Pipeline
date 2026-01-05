@@ -1321,6 +1321,9 @@ with T4:
         plot_album_data = album_join.copy()
         mess = "Daily Album Listening Trend"
 
+        #------ Album Play rate-------
+        play_rate = (plot_album_data["duration_minutes"].sum() / overall_listening_time) * 100
+
         # ------- popularity -------
         heading = "Average Popularity"
         pop = (saved_albums_df["popularity"].sum() /  (saved_albums_df.shape)[0]) 
@@ -1331,6 +1334,10 @@ with T4:
     else:
         plot_album_data = album_join[album_join['album_name'] == selected_group]
         mess = f"Daily {selected_group} Album Listening Trend"
+
+        #------ Album Play rate-------
+        all_albums_plays = album_join["duration_minutes"].sum() 
+        play_rate = (plot_album_data["duration_minutes"].sum() / all_albums_plays) * 100
 
         # ------- popularity -------
         heading = "Popularity"
@@ -1387,8 +1394,6 @@ with T4:
             most_listened_songs.columns = ['name','play_counts']
             most_listened_percentage = (most_listened_songs['play_counts'].max() / most_listened_songs['play_counts'].sum()) * 100
 
-            #------ Album Play rate-------
-            play_rate = (plot_album_data["duration_minutes"].sum() / overall_listening_time) * 100
             
             #--------- Total songs ---------
             st.markdown("### Album Stats")
@@ -1411,7 +1416,7 @@ with T4:
             st.metric(
                 label="Album Play Rate", 
                 value=f"{play_rate:.1f}%", 
-                delta="Of Overall Listening Time",
+                delta="Of Overall Listening Time" if selected_group == 'All Albums' else "Of Total Album Listenig Time",
                 delta_color="normal" 
             )
 
