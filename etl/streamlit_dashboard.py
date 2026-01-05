@@ -1481,7 +1481,7 @@ with T4:
 
             fig.update_layout(
                 title={
-                    'text': f"<b>{selected_group} Playlist  by Time of Day</b>",
+                    'text': f"<b>{selected_group} Album by Time of Day</b>",
                     'y':0.95,
                     'x':0.5,
                     'xanchor': 'center',
@@ -1536,7 +1536,7 @@ with T4:
                 x='Minutes Listened',
                 y='Days',
                 orientation='h',
-                title=f"{selected_group} Playlist Top Listening Days",
+                title=f"{selected_group} Album  Top Listening Days",
                 custom_data=['percent']
             )
 
@@ -1578,5 +1578,6 @@ with T4:
             )
             st.plotly_chart(fig, width = "stretch", theme=None, key="Album_listening_barh_plot")
 
+#------------
 
             
