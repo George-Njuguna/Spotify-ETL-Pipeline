@@ -1661,27 +1661,17 @@ with T5:
         data = saved_songs_join
         start_dt = data['played_at_date'].min()
         day_diff = (data['played_at_date'].max() - data['played_at_date'].min()).days
-        prev_date = start_dt - pd.Timedelta(days=day_diff)
-        sec_filter = ((saved_songs_join['played_at_date'] >= prev_date) & (saved_songs_join['played_at_date'] < start_dt))
-        sec_data = saved_songs_join[sec_filter]    
+   
     
     elif enable_date_filter and start_dt and not end_dt: # only the start date
         filter = saved_songs_join['played_at_date'] == start_dt 
         data = saved_songs_join[filter]
         day_diff = 1
-        prev_date = start_dt - pd.Timedelta(days=day_diff)
-
-        sec_filter = ((saved_songs_join['played_at_date'] >= prev_date) & (saved_songs_join['played_at_date'] < start_dt))
-        sec_data = saved_songs_join[sec_filter]
 
     else:
         filter = ((saved_songs_join['played_at_date'] >= start_dt) & (saved_songs_join['played_at_date'] <= end_dt))
         data = saved_songs_join[filter]
         day_diff = (end_dt - start_dt).days
-        prev_date = start_dt - pd.Timedelta(days=day_diff)
-
-        sec_filter = ((saved_songs_join['played_at_date'] >= prev_date) & (saved_songs_join['played_at_date'] < start_dt))
-        sec_data = saved_songs_join[sec_filter]
     
 
 
