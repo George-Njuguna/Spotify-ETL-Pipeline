@@ -1595,8 +1595,9 @@ with T5:
      # ------- calcs ----------
      # ---- saved listened ------
     saved_songs_join  = pd.merge(recently_played_df, saved_tracks_df, left_on = "id" ,right_on = "id", how = "inner")
-    
+    all_songs_join = pd.merge(recently_played_df, saved_tracks_df, left_on = "id" ,right_on = "id", how = "left")
 
+    
     most_listened_saved_song = (
         saved_songs_join.groupby(["id", "name_x"])
         .size()
@@ -1631,123 +1632,169 @@ with T5:
     k4.metric("Most Played Song", f"{most_listened_saved_song.iloc[0,1]}", f"{perc_saved_overall_listn:.2f}% Of Overall Listened Saved Songs")
     k5.metric("Top Artist by Saved Songs", f"{most_saved_artist_songs.iloc[0,1]}", f"{perc_artist_songs:.2f}% Of Saved Songs" )
 
-     #------------ Multi line graph------------
-    T5_col1 = st.columns(1)[0]
-    T5_col2, T5_col3, T5_col4 = st.columns([0.5, 1, 0.8])
-    album_names = most_listened_album.iloc[:, 1].tolist()
-    filter_options = album_names + ["All Albums"]
+    with st.expander("⚙ Filters"):
+        enable_date_filter = st.checkbox("Filter by date", value=False , key = "Album Checkbox")
 
-    with T5_col2:
-        with st.container(border=True):
-            selected_group = st.selectbox(
-                "Select Albums View for Detailed Analysis",
-                options=filter_options,
-                index=5
+        col_f1, col_f2 = st.columns(2) 
+        with col_f1:
+            start_dt = st.date_input(
+                "From",
+                value=min_date, 
+                min_value=min_date,
+                max_value=max_date,
+                disabled=not enable_date_filter,
+                key = "Album Date1"
             )
 
-    if selected_group == 'All Albums':
-        plot_album_data = album_join.copy()
-        mess = "Daily Album Listening Trend"
+        with col_f2:
+            end_dt = st.date_input(
+                "To",
+                value=None, 
+                min_value=start_dt,
+                max_value=max_date,
+                disabled=not enable_date_filter,
+                key = "Album Date2"
+            )
 
-        #------ Album Play rate-------
-        play_rate = (plot_album_data["duration_minutes"].sum() / overall_listening_time) * 100
+    if not enable_date_filter : # all Data
+        filter = ((saved_songs_join['played_at_date'] >= min_date) & (saved_songs_join['played_at_date'] <= max_date))
+        data = saved_songs_join
+        start_dt = data['played_at_date'].min()
+        day_diff = (data['played_at_date'].max() - data['played_at_date'].min()).days
+        prev_date = start_dt - pd.Timedelta(days=day_diff)
+        sec_filter = ((saved_songs_join['played_at_date'] >= prev_date) & (saved_songs_join['played_at_date'] < start_dt))
+        sec_data = saved_songs_join[sec_filter]    
+    
+    elif enable_date_filter and start_dt and not end_dt: # only the start date
+        filter = saved_songs_join['played_at_date'] == start_dt 
+        data = saved_songs_join[filter]
+        day_diff = 1
+        prev_date = start_dt - pd.Timedelta(days=day_diff)
 
-        # ------- popularity -------
-        heading = "Average Popularity"
-        pop = (saved_albums_df["popularity"].sum() /  (saved_albums_df.shape)[0]) 
-
-        # ------- Tracks ------
-        tracks = saved_albums_df["tracks"].sum()
+        sec_filter = ((saved_songs_join['played_at_date'] >= prev_date) & (saved_songs_join['played_at_date'] < start_dt))
+        sec_data = saved_songs_join[sec_filter]
 
     else:
-        plot_album_data = album_join[album_join['album_name'] == selected_group]
-        mess = f"Daily {selected_group} Album Listening Trend"
+        filter = ((saved_songs_join['played_at_date'] >= start_dt) & (saved_songs_join['played_at_date'] <= end_dt))
+        data = saved_songs_join[filter]
+        day_diff = (end_dt - start_dt).days
+        prev_date = start_dt - pd.Timedelta(days=day_diff)
 
-        #------ Album Play rate-------
-        all_albums_plays = album_join["duration_minutes"].sum() 
-        play_rate = (plot_album_data["duration_minutes"].sum() / all_albums_plays) * 100
-
-        # ------- popularity -------
-        heading = "Popularity"
-        pop = saved_albums_df.loc[saved_albums_df['name'] == selected_group, 'popularity'].iloc[0]
-
-        # ------- Tracks ------
-        tracks = saved_albums_df.loc[saved_albums_df['name'] == selected_group, 'tracks'].iloc[0]
-        perc_tracks = (tracks / saved_albums_df["tracks"].sum()) * 100
-
+        sec_filter = ((saved_songs_join['played_at_date'] >= prev_date) & (saved_songs_join['played_at_date'] < start_dt))
+        sec_data = saved_songs_join[sec_filter]
     
+
+
+    # ------------- Columns ------------
+    T5_col1 = st.columns(1)[0]
+    
+
     with T5_col1:
         with st.container(border=True):
-            album_listening_daily = plot_album_data.resample("3d", on="played_at")["duration_minutes"].sum().rolling(3).mean().rename("All").reset_index()
-            album_df_melted = album_listening_daily.rename(columns={"All": "Total Listening Time (Minute)", "played_at" : "Day"})
-            fig = px.line(
-                album_df_melted,
+            # ---------- Line Graph ----------
+            if day_diff > 3:
+                listening_hourly = data.resample("d", on="played_at")["duration_minutes"].sum().rolling(3).mean().rename("All").reset_index()
+                df_melted = listening_hourly.rename(columns={"All": "Total Listening Time (Minute)", "played_at" : "Day"})
+
+                fig = px.area(
+                df_melted,
                 x="Day",
                 y="Total Listening Time (Minute)",
                 line_shape="spline",
-                title=mess
-            )
+                title="Daily Listening Trend"
+                )
 
-            fig.update_traces(
-                line_color='#1DB954',
-                fillcolor='rgba(29, 185, 84, 0.3)',
-                mode="lines+markers",
-                marker=dict(color='#1DB954', size=6)
-            )
+                fig.update_traces(
+                    line_color='#1DB954',
+                    fillcolor='rgba(29, 185, 84, 0.3)',
+                    mode="lines+markers",
+                    marker=dict(color='#1DB954', size=6)
+                )
+                
+                fig.update_layout(
+                    paper_bgcolor='rgba(0,0,0,0)',
+                    plot_bgcolor='rgba(0,0,0,0)',
+                    hovermode="x unified"
+                )
+
+                fig.update_layout( 
+                    xaxis=dict(showspikes=False),  
+                    yaxis=dict(showspikes=False)   
+                )
+
+                fig.update_traces(mode="lines+markers")
+                fig.update_xaxes(showgrid=False)
+                fig.update_xaxes(showline=False)
+                fig.update_yaxes(showgrid=False)
+                fig.update_yaxes(showticklabels=False)
+                fig.update_layout(font=dict(family="CircularStd"))
+
+                st.plotly_chart(fig, width='stretch', theme="streamlit", key = "Saved songs line Graph")
+
+             # ---------- Bar Plot -----------
+            if day_diff <= 3:
+
+                listening_hourly = data.resample("h", on="played_at")["duration_minutes"].sum().rolling(3).mean().rename("All").reset_index()
+                df_melted = listening_hourly.rename(columns={"All": "Total Listening Time (Minute)", "played_at" : "Time of Day"})
+                max_val = df_melted['Total Listening Time (Minute)'].max()
+                colors = ['#EC5800' if val == max_val else '#1DB954' for val in df_melted['Total Listening Time (Minute)']]
+
+                fig = px.bar(
+                df_melted,
+                x="Time of Day",
+                y="Total Listening Time (Minute)",
+                title="Hourly Listening Trend"
+                )
+
+                fig.update_traces(
+                    marker_color=colors,  
+                    marker_line_width=0      
+                )
             
-            fig.update_layout(
-                paper_bgcolor='rgba(0,0,0,0)',
-                plot_bgcolor='rgba(0,0,0,0)',
-                hovermode="x unified"
-            )
+                fig.update_xaxes(showgrid=False)
+                fig.update_yaxes(showgrid=False, showticklabels=False)
+                fig.update_layout(
+                    font=dict(family="CircularStd"),
+                    xaxis_title=None,
+                    yaxis_title=None,
+                    bargap=0.2  
+                )
 
-            fig.update_layout( 
-                xaxis=dict(showspikes=False),  
-                yaxis=dict(showspikes=False)   
-            )
+                fig.update_layout(
+                    paper_bgcolor='rgba(0,0,0,0)',
+                    plot_bgcolor='rgba(0,0,0,0)',
+                    hovermode="x unified"
+                )
 
-            fig.update_traces(mode="lines+markers")
-            fig.update_xaxes(showgrid=False)
-            fig.update_xaxes(showline=False)
-            fig.update_yaxes(showgrid=False)
-            fig.update_yaxes(showticklabels=False)
-            fig.update_layout(font=dict(family="CircularStd"))
+                fig.update_layout( 
+                    xaxis=dict(showspikes=False),  
+                    yaxis=dict(showspikes=False)   
+                )
 
-            st.plotly_chart(fig, width='stretch', theme="streamlit", key = "album listening stats line Graph")
+                st.plotly_chart(fig, width = "stretch", theme="streamlit", key="saved_Songs_bar_chart")
+        
 
-    with T5_col2:
-        with st.container(border=True):
-            
-
-            
-            #--------- Total songs ---------
-            st.markdown("### Album Stats")
-            st.metric(
-                label="Total songs", 
-                value=f"{tracks}", 
-                delta_color="normal"
-            )
-            st.markdown("---")
-            
-            #---------- popularity ---------
-            st.metric(
-                label = heading, 
-                value=f"{pop:.1f}", 
-                delta_color="normal"
-            )
-            st.markdown("---")
-            
-            # --------Playlist Play rate-------
-            st.metric(
-                label="Album Play Rate", 
-                value=f"{play_rate:.1f}%", 
-                delta="Of Overall Listening Time" if selected_group == 'All Albums' else "Of Total Album Listenig Time",
-                delta_color="normal" 
-            )
+    # --------- Columns -----------
+    T5_col3, T5_col4, T5_col5 = st.columns([0.7, 0.5, 0.5])
 
     with T5_col3:
         with st.container(border=True):
-            bubble_data = plot_album_data.groupby('time_frames')['duration_minutes'].sum().reset_index()
+
+            if not enable_date_filter :
+                filter = ((saved_songs_join['played_at_date'] >= min_date) & (saved_songs_join['played_at_date'] <= max_date))
+                data = saved_songs_join.copy()
+
+            elif enable_date_filter and start_dt and not end_dt:
+                filter = saved_songs_join['played_at_date'] == start_dt
+                data = saved_songs_join[filter]
+
+            else :
+                filter = ((saved_songs_join['played_at_date'] >= start_dt) & (saved_songs_join['played_at_date'] <= end_dt))
+                data = saved_songs_join[filter]
+              
+
+            # --------- Buble Chart ---------
+            bubble_data = data.groupby('time_frames')['duration_minutes'].sum().reset_index()
             bubble_data.columns = ['Timeframe', 'Total Minutes']
             max_val = bubble_data['Total Minutes'].max()
 
@@ -1784,7 +1831,6 @@ with T5:
 
             vibrant_palette = ["#1DB954", "#00E5FF", "#7000FF", "#FF007A", "#FFD700", "#94D2BD", "#E9D8A6"]
 
-            # ------------ Bubble Chart ------------
             for i, row in enumerate(bubble_data.itertuples()):
                 total_mins = int(getattr(row, 'Total_Minutes', row[2]))
                 
@@ -1809,7 +1855,7 @@ with T5:
 
             fig.update_layout(
                 title={
-                    'text': f"<b>{selected_group} Album by Time of Day</b>",
+                    'text': "<b>Listening by Time of Day</b>",
                     'y':0.95,
                     'x':0.5,
                     'xanchor': 'center',
@@ -1832,80 +1878,161 @@ with T5:
                 hoverlabel=dict(bgcolor="#212121", font_size=14, font_family="CircularStd")
             )
 
-            st.plotly_chart(fig, width = "stretch", theme=None, key="Album Bubble Chart")
+            st.plotly_chart(fig, width = "stretch", theme=None, key="Saved Songs Bubble Chart")
 
-     # --------- KPI above the Barh Plot ----------       
-    with T5_col4:
-        with st.container(border=True):
-            #------ Most Listened Song on album -------
-            most_listened_songs = plot_album_data['name_x'].value_counts().reset_index()
-            most_listened_songs.columns = ['name','play_counts']
-            most_listened_percentage = (most_listened_songs['play_counts'].max() / most_listened_songs['play_counts'].sum()) * 100
+        with T5_col4:
+            with st.container(border=True):    
 
-            st.metric(
-                label="Most Listened Song", 
-                value=f"{most_listened_songs.iloc[0,0]}", 
-                delta=f"{most_listened_percentage:.2f}% Of {selected_group} Songs",
-                delta_color="normal"
-            )
+                if not enable_date_filter :
 
-        # ------------ Barh Plot -------------
-    with T5_col4:
-        with st.container(border=True):
-            barh_data = (plot_album_data.groupby("day")['duration_minutes'].sum().sort_values(ascending = True)).reset_index()
-            barh_data.columns = ['Days', 'Minutes Listened']
-            total_minutes = barh_data['Minutes Listened'].sum()
-            barh_data['percent'] = (barh_data['Minutes Listened'] / total_minutes * 100).round(1).astype(str) + '%'
-            max_val = barh_data['Minutes Listened'].max()
-            colors = ['#EC5800' if val == max_val else '#1DB954' for val in barh_data['Minutes Listened']]
+                    dt1 = all_songs_join[all_songs_join['played_at_date'] <= max_date]
+                    dt2 = saved_songs_join[saved_songs_join['played_at_date'] <= max_date]
+                    print(dt1.columns.to_list())
 
-            fig = px.bar(
-                barh_data,
-                x='Minutes Listened',
-                y='Days',
-                orientation='h',
-                title=f"{selected_group} Album  Top Listening Days",
-                custom_data=['percent']
-            )
+                    pie_data = pd.DataFrame({
+                        "song_type": ["Saved songs", "Not Saved"],
+                        "count": [(dt2.shape)[0], ((dt1[dt1['name_y'].isnull()]).shape)[0]] 
+                    })
 
-            # 3. Update Hover and Styling
-            fig.update_traces(
-                marker_color=colors,
-                hovertemplate="<b>%{y}</b><br>Minutes: %{x}<br>Share: %{customdata[0]}<extra></extra>",
-                marker_line_width=0
-            )
-            
-            fig.update_traces(
-                    marker_color=colors,
-                    marker_line_width=0,
-                    textposition='outside',
-                    textfont_size=14, 
-                    cliponaxis=False      
+                elif enable_date_filter and start_dt and not end_dt:
+
+                    dt1 = all_songs_join[all_songs_join['played_at_date']  <= start_dt]
+                    dt2 = saved_songs_join[saved_songs_join['played_at_date']  <= start_dt]
+                    print(dt1.columns.to_list())
+
+                    pie_data = pd.DataFrame({
+                        "song_type": ["Saved songs", "Not Saved"],
+                        "count": [(dt2.shape)[0], ((dt1[dt1['name_y'].isnull()]).shape)[0]] 
+                    })
+
+                else :
+
+                    dt1 = all_songs_join[all_songs_join['played_at_date'] <= end_dt]
+                    dt2 = saved_songs_join[saved_songs_join['played_at_date'] <= end_dt]
+                    print(dt1.columns.to_list())
+
+                    pie_data = pd.DataFrame({
+                        "song_type": ["Saved songs", "Not Saved"],
+                        "count": [(dt2.shape)[0], ((dt1[dt1['name_y'].isnull()]).shape)[0]] 
+                    })
+               
+
+                 # ---------- pie --------
+                fig = px.pie(
+                    pie_data,
+                    names="song_type",
+                    values="count",
+                    color_discrete_sequence=spotify_palette,
+                    hole=0.8 
                 )
-            
-            fig.update_xaxes(showgrid=False)
-            fig.update_yaxes(showgrid=False, showticklabels=True, tickfont=dict(size=14, color='white'))
-            fig.update_layout(
-                font=dict(family="CircularStd"),
-                xaxis_title=None,
-                yaxis_title=None,
-                showlegend=False, 
-                margin=dict(l=150),
-                bargap=0.2  
-            )
 
-            fig.update_layout(
-                paper_bgcolor='rgba(0,0,0,0)',
-                plot_bgcolor='rgba(0,0,0,0)',
-                hovermode="x unified"
-            )
+                fig.add_annotation(
+                    text=f"{songs_played:,} Songs",
+                    x=0.5,            
+                    y=0.5,             
+                    showarrow=False,
+                    font=dict(
+                        size=18,
+                        color="White"
+                    )
+                ) 
 
-            fig.update_layout( 
-                xaxis=dict(showspikes=False),  
-                yaxis=dict(showspikes=False)   
-            )
-            st.plotly_chart(fig, width = "stretch", theme=None, key="Album_listening_barh_plot")
+                fig.update_layout(
+                    title="Saved Vs Unsaved Tracks",
+                    font=dict(family="CircularStd"),
+                    paper_bgcolor='rgba(0,0,0,0)',
+                    plot_bgcolor='rgba(0,0,0,0)',
+                    showlegend=True,
+                    legend=dict(
+                        orientation="h",     
+                        yanchor="bottom",
+                        y=-0.2,              
+                        xanchor="center",
+                        x=0.5               
+                    ),
+                    margin=dict(t=80, b=20, l=20, r=20) 
+                )
 
+                pull_values = [0.2 if name == "Not Saved" else 0 for name in pie_data["song_type"]]
+                
+                fig.update_traces(
+                    textinfo='percent+label', 
+                    hovertemplate="<b>%{label}</b><br>Count: %{value}<br>Percentage: %{percent}<extra></extra>"
+                )
 
+                fig.update_layout(
+                    xaxis=dict(showspikes=False),  
+                    yaxis=dict(showspikes=False)   
+                )
 
-            
+                fig.update_traces(pull=pull_values,textinfo='none', rotation = 90) 
+                fig.update_layout(title="New Vs Replayed Tracks")
+                fig.update_layout(font=dict(family="CircularStd"))
+
+                st.plotly_chart(fig, width="stretch", theme="streamlit", key = "saved songs pie chart " )
+
+        with T5_col5:
+            with st.container(border=True):
+                if not enable_date_filter :
+                    filter = ((saved_songs_join['played_at_date'] >= min_date) & (saved_songs_join['played_at_date'] <= max_date))
+                    data = saved_songs_join[filter]
+
+                else:
+                    week_end_dt = start_dt + pd.Timedelta(days=7)
+                    filter = ((saved_songs_join['played_at_date'] >= start_dt) & (saved_songs_join['played_at_date'] <= week_end_dt))
+                    data = saved_songs_join[filter]
+
+                # -------getting sum of listening minutes by day ----------
+                barh_data = (data.groupby("day")['duration_minutes'].sum().sort_values(ascending = True)).reset_index()
+                barh_data.columns = ['Days', 'Minutes Listened']
+                total_minutes = barh_data['Minutes Listened'].sum()
+                barh_data['percent'] = (barh_data['Minutes Listened'] / total_minutes * 100).round(1).astype(str) + '%'
+                max_val = barh_data['Minutes Listened'].max()
+                colors = ['#EC5800' if val == max_val else '#1DB954' for val in barh_data['Minutes Listened']]
+
+                fig = px.bar(
+                    barh_data,
+                    x='Minutes Listened',
+                    y='Days',
+                    orientation='h',
+                    title="Top Listening Days",
+                    custom_data=['percent']
+                )
+
+                # 3. Update Hover and Styling
+                fig.update_traces(
+                    marker_color=colors,
+                    hovertemplate="<b>%{y}</b><br>Minutes: %{x}<br>Share: %{customdata[0]}<extra></extra>",
+                    marker_line_width=0
+                )
+                
+                fig.update_traces(
+                        marker_color=colors,
+                        marker_line_width=0,
+                        textposition='outside',
+                        textfont_size=14, 
+                        cliponaxis=False      
+                    )
+                
+                fig.update_xaxes(showgrid=False)
+                fig.update_yaxes(showgrid=False, showticklabels=True, tickfont=dict(size=14, color='white'))
+                fig.update_layout(
+                    font=dict(family="CircularStd"),
+                    xaxis_title=None,
+                    yaxis_title=None,
+                    showlegend=False, 
+                    margin=dict(l=150),
+                    bargap=0.2  
+                )
+
+                fig.update_layout(
+                    paper_bgcolor='rgba(0,0,0,0)',
+                    plot_bgcolor='rgba(0,0,0,0)',
+                    hovermode="x unified"
+                )
+
+                fig.update_layout( 
+                    xaxis=dict(showspikes=False),  
+                    yaxis=dict(showspikes=False)   
+                )
+                st.plotly_chart(fig, width = "stretch", theme=None, key="weekly_saved_songs_listening_barh_plot")
