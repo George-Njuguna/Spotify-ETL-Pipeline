@@ -735,6 +735,25 @@ with T2:
 
             st.plotly_chart(fig, width = "stretch", theme=None, key="Bubble Chart")
 
+        most_played_song = data['name'].value_counts().reset_index()
+        most_played_song.columns = ['name','play_counts']
+        most_played_times = most_played_song['play_counts'].max() 
+
+        most_played_artist = data['artist_name'].value_counts().reset_index()
+        most_played_artist.columns = ['name','play_counts']
+        most_listened_percentage = (most_played_artist['play_counts'].max() / most_played_artist['play_counts'].sum()) * 100
+
+
+         # ----------- Most Played song----------
+        with T2_col4:
+            with st.container(border=True):
+                st.metric(
+                    label="Most Played Song", 
+                    value=f"{most_played_song.iloc[0,0]}", 
+                    delta=f"Played {most_played_times} Times",
+                    delta_color="normal" 
+                )
+
         with T2_col4:
             with st.container(border=True):    
 
@@ -846,6 +865,15 @@ with T2:
                 fig.update_layout(font=dict(family="CircularStd"))
 
                 st.plotly_chart(fig, width="stretch", theme="streamlit", key = "pie chart 2" )
+        
+        with T2_col5:
+            with st.container(border=True):
+                st.metric(
+                    label="Most Played Artist", 
+                    value=f"{most_played_artist.iloc[0,0]}", 
+                    delta=f"Listened {most_listened_percentage:.0f}% Of The Time",
+                    delta_color="normal" 
+                )
 
         with T2_col5:
             with st.container(border=True):
@@ -1769,7 +1797,7 @@ with T5:
         
 
     # --------- Columns -----------
-    T5_col3, T5_col4, T5_col5 = st.columns([0.7, 0.5, 0.5])
+    T5_col3, T5_col4, T5_col5 = st.columns([0.7, 0.4, 0.7])
 
     with T5_col3:
         with st.container(border=True):
@@ -1874,6 +1902,7 @@ with T5:
 
             st.plotly_chart(fig, width = "stretch", theme=None, key="Saved Songs Bubble Chart")
 
+        # -------- Play Rate ---------
         with T5_col4:
             with st.container(border=True):
                 st.metric(
