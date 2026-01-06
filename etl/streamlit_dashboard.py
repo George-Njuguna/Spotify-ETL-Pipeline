@@ -1657,6 +1657,7 @@ with T5:
             )
 
     if not enable_date_filter : # all Data
+        all_plays = recently_played_df
         filter = ((saved_songs_join['played_at_date'] >= min_date) & (saved_songs_join['played_at_date'] <= max_date))
         data = saved_songs_join
         start_dt = data['played_at_date'].min()
@@ -1664,17 +1665,20 @@ with T5:
    
     
     elif enable_date_filter and start_dt and not end_dt: # only the start date
+        all_plays = recently_played_df[(recently_played_df['played_at_date'] == start_dt)]
         filter = saved_songs_join['played_at_date'] == start_dt 
         data = saved_songs_join[filter]
         day_diff = 1
 
     else:
+        all_plays = recently_played_df[((recently_played_df['played_at_date'] >= start_dt) & (recently_played_df['played_at_date'] <= end_dt))]
         filter = ((saved_songs_join['played_at_date'] >= start_dt) & (saved_songs_join['played_at_date'] <= end_dt))
         data = saved_songs_join[filter]
         day_diff = (end_dt - start_dt).days
+
+    all_saved_plays = all_plays["duration_minutes"].sum() 
+    play_rate = (data["duration_minutes"].sum() / all_saved_plays) * 100
     
-
-
     # ------------- Columns ------------
     T5_col1 = st.columns(1)[0]
     
@@ -1869,6 +1873,16 @@ with T5:
             )
 
             st.plotly_chart(fig, width = "stretch", theme=None, key="Saved Songs Bubble Chart")
+
+        with T5_col4:
+            with st.container(border=True):
+                st.metric(
+                    label="Saved Songs Play Rate", 
+                    value=f"{play_rate:.1f}%", 
+                    delta="Of Overall Listening Time",
+                    delta_color="normal" 
+                )
+                
 
         with T5_col4:
             with st.container(border=True):    
