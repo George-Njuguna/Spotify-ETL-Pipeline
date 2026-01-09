@@ -55,9 +55,11 @@ Finally, I will build an interactive dashboard in **Tableau** to visualize the i
 ## Airflow Website
 ![alt text](Airflow1.png)
 
-##  Dashboard Example
-
-
+##  Dashboard
+![alt text](Images/spotify_dashboard_1.png)
+![alt text](Images/spotify_dashboard_2.png)
+![alt text](Images/spotify_dashboard_3.png)
+![alt text](Images/spotify_dashboard_4.png)
 
 ---
 
