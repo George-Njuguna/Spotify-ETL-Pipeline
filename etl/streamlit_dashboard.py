@@ -208,7 +208,7 @@ min_date = recently_played_df["played_at_date"].min()
 st.title("SPOTIFY WRAPPED DASHBOARD")
 
  # setting tabs
-T1,T2,T3,T4,T5,T6 = st.tabs(["Overview", "Listening Stats", "Playlists", "Albums", "Saved Songs", "Artists"])
+T1,T2,T3,T4,T5 = st.tabs(["Overview", "Listening Stats", "Playlists", "Albums", "Saved Songs"])
 
 
  # --------------OVERVIEW--------------
