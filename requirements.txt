@@ -1,6 +1,8 @@
 spotipy==2.25.1
+streamlit
 pandas
-python-dotenv
-pendulum
+numpy
+matplotlib
+plotly
 psycopg2-binary
-datetime
+python-dotenv
